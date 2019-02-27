@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/tom/grive-Tom.Wimmenhove/Projects/cpld_test/hdl_test/testbench_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="testbench" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="10" />
+   <wvobject fp_name="/testbench/CLK" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/RST" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">RST</obj_property>
+      <obj_property name="ObjectShortName">RST</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/uut/counter/counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/CAPT" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">CAPT</obj_property>
+      <obj_property name="ObjectShortName">CAPT</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/uut/count_latch" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">count_latch[3:0]</obj_property>
+      <obj_property name="ObjectShortName">count_latch[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/INT" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">INT</obj_property>
+      <obj_property name="ObjectShortName">INT</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/RSTCAPT" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">RSTCAPT</obj_property>
+      <obj_property name="ObjectShortName">RSTCAPT</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/CE_N" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">CE_N</obj_property>
+      <obj_property name="ObjectShortName">CE_N</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/SCLK" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">SCLK</obj_property>
+      <obj_property name="ObjectShortName">SCLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/SDO" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">SDO</obj_property>
+      <obj_property name="ObjectShortName">SDO</obj_property>
+   </wvobject>
+</wave_config>

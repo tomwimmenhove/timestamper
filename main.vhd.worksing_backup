@@ -1,0 +1,172 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:    14:48:25 02/24/2019 
+-- Design Name: 
+-- Module Name:    main - Behavioral 
+-- Project Name: 
+-- Target Devices: 
+-- Tool versions: 
+-- Description: 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity main is
+	generic (
+		--WIDTH: integer := 4
+		WIDTH: integer := 27
+	);
+	 
+	port (
+		CLK: in std_logic;
+		RST: in std_logic;
+		
+		CAPT: in std_logic;
+		RSTCAPT: in std_logic;
+		
+		SCLK: in std_logic;
+		CE_N: in std_logic;
+		SDO: out std_logic;
+		INT: out std_logic
+	);
+end main;
+
+architecture Behavioral of main is
+	signal COUNTER: std_logic_vector(WIDTH - 1 downto 0);
+	signal LATCH: std_logic_vector(WIDTH - 1 downto 0);
+	signal CAPTURE_ENABLED: std_logic;
+	signal BMUX: std_logic_vector(4 downto 0);
+	signal SDODATA: std_logic;
+begin
+
+--	with BMUX select
+--		SDODATA <=
+--			-- D2B=({0..1}{0..1}{0..1}{0..1}{0..1}) ; for I in `seq 0 26` ; do echo "LATCH(WIDTH - $[ $I + 1 ]) when \"${D2B[$I]}\"," ; done
+--			LATCH(WIDTH - 1) when "00000",
+--			LATCH(WIDTH - 2) when "00001",
+--			LATCH(WIDTH - 3) when "00010",
+--			LATCH(WIDTH - 4) when "00011",
+--			LATCH(WIDTH - 5) when "00100",
+--			LATCH(WIDTH - 6) when "00101",
+--			LATCH(WIDTH - 7) when "00110",
+--			LATCH(WIDTH - 8) when "00111",
+--			LATCH(WIDTH - 9) when "01000",
+--			LATCH(WIDTH - 10) when "01001",
+--			LATCH(WIDTH - 11) when "01010",
+--			LATCH(WIDTH - 12) when "01011",
+--			LATCH(WIDTH - 13) when "01100",
+--			LATCH(WIDTH - 14) when "01101",
+--			LATCH(WIDTH - 15) when "01110",
+--			LATCH(WIDTH - 16) when "01111",
+--			LATCH(WIDTH - 17) when "10000",
+--			LATCH(WIDTH - 18) when "10001",
+--			LATCH(WIDTH - 19) when "10010",
+--			LATCH(WIDTH - 20) when "10011",
+--			LATCH(WIDTH - 21) when "10100",
+--			LATCH(WIDTH - 22) when "10101",
+--			LATCH(WIDTH - 23) when "10110",
+--			LATCH(WIDTH - 24) when "10111",
+--			LATCH(WIDTH - 25) when "11000",
+--			LATCH(WIDTH - 26) when "11001",
+--			LATCH(WIDTH - 27) when "11010",
+--				'0' when others;
+
+	CounterProcess: process(RST, CLK)
+	begin
+		if RST = '1' then
+			COUNTER <= (others => '0');
+		else
+			if rising_edge(CLK) then
+				COUNTER <= COUNTER + 1;
+			end if;
+		end if;
+	end process;
+		
+	CaptureProcess: process(CAPT, RSTCAPT, CE_N, LATCH)
+	begin
+		if RSTCAPT = '1' then
+			CAPTURE_ENABLED <= '1';
+			INT <= '0';
+		else
+			if CE_N = '1' then
+				if CAPTURE_ENABLED = '1' and rising_edge(CAPT) then
+					LATCH <= COUNTER;
+					CAPTURE_ENABLED <= '0';
+					INT <= '1';
+				end if;
+			end if;
+		end if;
+	end process;
+	
+	SpiProcess: process(SCLK, CE_N, LATCH, SDODATA)
+	begin
+		if CE_N = '1' then
+			BMUX <= (others => '0');
+			SDO <= 'Z';
+		else
+			if rising_edge(SCLK) then
+				case BMUX is
+					--D2B=({0..1}{0..1}{0..1}{0..1}{0..1}) ; for I in `seq 0 26` ; do echo "when \"${D2B[$I]}\" => SDODATA <= LATCH(WIDTH - $[ $I + 1 ]);" ; done
+					when "00000" => SDODATA <= LATCH(WIDTH - 1);
+					when "00001" => SDODATA <= LATCH(WIDTH - 2);
+					when "00010" => SDODATA <= LATCH(WIDTH - 3);
+					when "00011" => SDODATA <= LATCH(WIDTH - 4);
+					when "00100" => SDODATA <= LATCH(WIDTH - 5);
+					when "00101" => SDODATA <= LATCH(WIDTH - 6);
+					when "00110" => SDODATA <= LATCH(WIDTH - 7);
+					when "00111" => SDODATA <= LATCH(WIDTH - 8);
+					when "01000" => SDODATA <= LATCH(WIDTH - 9);
+					when "01001" => SDODATA <= LATCH(WIDTH - 10);
+					when "01010" => SDODATA <= LATCH(WIDTH - 11);
+					when "01011" => SDODATA <= LATCH(WIDTH - 12);
+					when "01100" => SDODATA <= LATCH(WIDTH - 13);
+					when "01101" => SDODATA <= LATCH(WIDTH - 14);
+					when "01110" => SDODATA <= LATCH(WIDTH - 15);
+					when "01111" => SDODATA <= LATCH(WIDTH - 16);
+					when "10000" => SDODATA <= LATCH(WIDTH - 17);
+					when "10001" => SDODATA <= LATCH(WIDTH - 18);
+					when "10010" => SDODATA <= LATCH(WIDTH - 19);
+					when "10011" => SDODATA <= LATCH(WIDTH - 20);
+					when "10100" => SDODATA <= LATCH(WIDTH - 21);
+					when "10101" => SDODATA <= LATCH(WIDTH - 22);
+					when "10110" => SDODATA <= LATCH(WIDTH - 23);
+					when "10111" => SDODATA <= LATCH(WIDTH - 24);
+					when "11000" => SDODATA <= LATCH(WIDTH - 25);
+					when "11001" => SDODATA <= LATCH(WIDTH - 26);
+					when "11010" => SDODATA <= LATCH(WIDTH - 27);
+					when others => SDODATA <= '0';
+				end case;
+					--BMUX <= BMUX + 1;
+			end if;
+
+			if falling_edge(SCLK) then
+				BMUX <= BMUX + 1;
+			end if;
+			
+			SDO <= SDODATA;
+		end if;
+	end process;
+	
+end Behavioral;
+
