@@ -98,35 +98,40 @@ module testbench;
 		#10;
 	
 		// Clock out first two bits
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
-
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
+		for (x=0; x < 2; x= x+1)
+		begin
+			SCLK = 1;
+			#10;
+			SCLK = 0;
+			#10;
+		end;
 
 
 		// Select some other chip that's NOT us.
 		CE_N = 1;
 		#10;
 		
-		// 2 clocks
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
-
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
+		// Clock some
+		for (x=0; x < 2; x= x+1)
+		begin
+			SCLK = 1;
+			#10;
+			SCLK = 0;
+			#10;
+		end;
 		
 		// Select us again
 		CE_N = 0;
 		#10;
+		
+		// Clock whole byte
+		for (x=0; x < 8; x= x+1)
+		begin
+			SCLK = 1;
+			#10;
+			SCLK = 0;
+			#10;
+		end;
 		
 		// Reset the count
 		RST = 1;
@@ -150,16 +155,14 @@ module testbench;
 		CAPT = 0;
 		#10;
 
-		// Clock out the last two bits
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
-
-		SCLK = 1;
-		#10;
-		SCLK = 0;
-		#10;
+		// Clock out the last bits
+		for (x=0; x < 2; x= x+1)
+		begin
+			SCLK = 1;
+			#10;
+			SCLK = 0;
+			#10;
+		end;
 		
 		CE_N = 1;
 		#10;
@@ -190,7 +193,7 @@ module testbench;
 		#10;
 
 		// Clock out the captured count.
-		for (x=0; x < 4; x= x+1)
+		for (x=0; x < 8; x= x+1)
 		begin
 			SCLK = 1;
 			#10;

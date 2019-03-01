@@ -19,11 +19,12 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 entity main is
 	generic (
-		WIDTH: integer := 4
-		--WIDTH: integer := 27
+		--WIDTH: integer := 4
+		WIDTH: integer := 27
 	);
 	 
 	port (
@@ -33,7 +34,7 @@ entity main is
 		-- Counter capture
 		CAPT: in std_logic;
 		RSTCAPT: in std_logic;
-		
+			
 		-- SPI output
 		SCLK: in std_logic;
 		CE_N: in std_logic;
@@ -45,7 +46,9 @@ entity main is
 end main;
 
 architecture Behavioral of main is
-	signal COUNT_LATCH: std_logic_vector(WIDTH - 1 downto 0);
+	signal COUNT_LATCH: std_logic_vector(WIDTH - 1 downto 0);	-- The counter (capture) latch
+	signal COUNT_BYTE_LATCH: std_logic_vector((WIDTH + (((8 - (WIDTH mod 8)) mod 8))) - 1 downto 0);	-- Left-justified byte-aligned representation of the counter latch
+	
 	signal SPI_SDO: std_logic;
 begin
 	-- Counter instance
@@ -63,15 +66,19 @@ begin
 		INT => INT
 	);
 	
-	-- SPI instance
+	-- Align the counter value
+	COUNT_BYTE_LATCH <= std_logic_vector(resize(unsigned(COUNT_LATCH), COUNT_BYTE_LATCH'length));
+
+	-- Only drive the SDO pin (with SPI_SDO) when chip_select is assreted (low)
 	with CE_N select SDO <= SPI_SDO when '0', 'Z' when others;
 
+	-- SPI instance
 	spi: entity work.serial_out
 	generic map(
-		TXWIDTH => WIDTH
+		TXWIDTH => COUNT_BYTE_LATCH'length
 	)
 	port map(
-		TXREG => COUNT_LATCH,
+		TXREG => COUNT_BYTE_LATCH,
 		SCLK => SCLK,
 		CE_N => CE_N,
 		SDO => SPI_SDO

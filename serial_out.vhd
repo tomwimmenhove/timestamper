@@ -24,7 +24,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity serial_out is
 	generic (
-		TXWIDTH: integer := 8
+		TXWIDTH: integer := 8;
+		BMUXWIDTH: integer := 5
 	);
 	
 	port (
@@ -36,11 +37,11 @@ entity serial_out is
 end serial_out;
 
 architecture Behavioral of serial_out is
-	signal BMUX: std_logic_vector(4 downto 0);
+	signal BMUX: std_logic_vector(BMUXWIDTH - 1 downto 0);
 begin
-	SDO <= TXREG(TXWIDTH - to_integer(unsigned(BMUX)) - 1);
+	--SDO <= TXREG(TXWIDTH - to_integer(unsigned(BMUX)) - 1);
 
-	SpiOutProcess: process(SCLK, CE_N)
+	SpiOutProcess: process(SCLK, CE_N, BMUX)
 	begin
 		if CE_N = '1' then
 			BMUX <= (others => '0');
@@ -48,6 +49,10 @@ begin
 			if falling_edge(SCLK) then -- CPOL == CPHA == 0
 				BMUX <= BMUX + 1;
 			end if;
+		end if;
+		
+		if to_integer(unsigned(BMUX)) < TXWIDTH then
+			SDO <= TXREG(TXWIDTH - to_integer(unsigned(BMUX)) - 1);
 		end if;
 	end process;
 end Behavioral;

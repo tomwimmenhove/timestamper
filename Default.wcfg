@@ -3,7 +3,7 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="/home/tom/grive-Tom.Wimmenhove/Projects/cpld_test/hdl_test/testbench_isim_beh.wdb" id="1" type="auto">
+      <db_ref path="/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/testbench_isim_beh.wdb" id="1" type="auto">
          <top_modules>
             <top_module name="glbl" />
             <top_module name="numeric_std" />
@@ -14,7 +14,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="10" />
+   <WVObjectSize size="12" />
    <wvobject fp_name="/testbench/CLK" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">CLK</obj_property>
       <obj_property name="ObjectShortName">CLK</obj_property>
@@ -35,6 +35,10 @@
       <obj_property name="ElementShortName">count_latch[3:0]</obj_property>
       <obj_property name="ObjectShortName">count_latch[3:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/testbench/uut/count_byte_latch" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">count_byte_latch[7:0]</obj_property>
+      <obj_property name="ObjectShortName">count_byte_latch[7:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="/testbench/INT" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">INT</obj_property>
       <obj_property name="ObjectShortName">INT</obj_property>
@@ -54,5 +58,9 @@
    <wvobject fp_name="/testbench/SDO" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">SDO</obj_property>
       <obj_property name="ObjectShortName">SDO</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/uut/spi/bmux" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">bmux[5:0]</obj_property>
+      <obj_property name="ObjectShortName">bmux[5:0]</obj_property>
    </wvobject>
 </wave_config>

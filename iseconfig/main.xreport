@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2019-02-26T20:16:19</DateModified>
+  <DateModified>2019-02-28T21:57:46</DateModified>
   <ModuleName>main</ModuleName>
-  <SummaryTimeStamp>2019-02-26T18:45:15</SummaryTimeStamp>
+  <SummaryTimeStamp>2019-02-28T21:55:16</SummaryTimeStamp>
   <SavedFilePath>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/iseconfig/main.xreport</SavedFilePath>
   <ImplementationReportsDirectory>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/</ImplementationReportsDirectory>
   <DateInitialized>2019-02-24T14:48:25</DateInitialized>
