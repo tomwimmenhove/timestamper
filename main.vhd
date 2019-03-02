@@ -79,7 +79,8 @@ begin
 	-- spi instance
 	i_spi_out: entity work.serial_out
 	generic map(
-		txwidth => count_byte_latch'length
+		txwidth => count_byte_latch'length,
+		bmuxwidth => 5
 	)
 	port map(
 		txreg => count_byte_latch,

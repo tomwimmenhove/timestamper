@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/tb_main_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="tb_main" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/tb_main/mrst_n" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mrst_n</obj_property>
+      <obj_property name="ObjectShortName">mrst_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/uut/pps" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">pps</obj_property>
+      <obj_property name="ObjectShortName">pps</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/uut/i_capture_counter_ts/counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/capt" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">capt</obj_property>
+      <obj_property name="ObjectShortName">capt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/uut/count_latch" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">count_latch[3:0]</obj_property>
+      <obj_property name="ObjectShortName">count_latch[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/rstcapt" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rstcapt</obj_property>
+      <obj_property name="ObjectShortName">rstcapt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/sclk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">sclk</obj_property>
+      <obj_property name="ObjectShortName">sclk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/ce_n" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">ce_n</obj_property>
+      <obj_property name="ObjectShortName">ce_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/sdo" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">sdo</obj_property>
+      <obj_property name="ObjectShortName">sdo</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/int" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">int</obj_property>
+      <obj_property name="ObjectShortName">int</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_main/uut/i_capture_counter_ts/rst_armed" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst_armed</obj_property>
+      <obj_property name="ObjectShortName">rst_armed</obj_property>
+   </wvobject>
+</wave_config>
