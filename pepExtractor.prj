@@ -1,1 +1,3 @@
+work	"capture_counter.vhd"
+work	"main.vhd"
 work	"serial_out.vhd"

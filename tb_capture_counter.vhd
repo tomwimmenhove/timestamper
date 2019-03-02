@@ -47,6 +47,7 @@ ARCHITECTURE behavior OF tb_capture_counter IS
 		WIDTH: integer := WIDTH
 	);
 	 PORT(
+			MRST_N : IN  std_logic;
          CAPTURE_ENABLE : IN  std_logic;
          CLK : IN  std_logic;
          RST : IN  std_logic;
@@ -58,6 +59,7 @@ ARCHITECTURE behavior OF tb_capture_counter IS
     END COMPONENT;
 
    --Inputs
+	signal MRST_N : std_logic := '0';
    signal CAPTURE_ENABLE : std_logic := '0';
    signal CLK : std_logic := '0';
    signal RST : std_logic := '0';
@@ -75,14 +77,15 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: capture_counter PORT MAP (
-          CAPTURE_ENABLE => CAPTURE_ENABLE,
-          CLK => CLK,
-          RST => RST,
-          CAPT => CAPT,
-          RSTCAPT => RSTCAPT,
-          LATCH => LATCH,
-          INT => INT
-        );
+		MRST_N => MRST_N,
+		CAPTURE_ENABLE => CAPTURE_ENABLE,
+		CLK => CLK,
+		RST => RST,
+		CAPT => CAPT,
+		RSTCAPT => RSTCAPT,
+		LATCH => LATCH,
+		INT => INT
+	);
 
    -- Clock process definitions
    CLK_process :process
@@ -96,16 +99,15 @@ BEGIN
 
    -- Stimulus process
    stim_proc: process
-   begin		
-		RST <= '1';
-		RSTCAPT <= '1';
-      wait for CLK_period * 1;
-		RST <= '0';
-		RSTCAPT <= '0';
+   begin
+		MRST_N <= '0';
+		wait for CLK_period * 10;
+		MRST_N <= '1';
+		wait for CLK_period * 1;
 		
 		CAPTURE_ENABLE <= '1';
 		
-		wait for CLK_period * 10;
+		wait for CLK_period;
 
 		CAPT <= '1';
 		wait for CLK_period * 3;

@@ -8,7 +8,10 @@
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
--- Description: 
+-- Description: Increase count on clk. Reset count on first clock with rst asserted.
+--              Capture count into latch on first rising clock edge with capt asserted.
+--              Capture disabled after capture until first rising clock edge with rstcap asserted.
+--              Int is high when new data on the latch. Rstcap clears int.
 --
 -- Dependencies: 
 --
@@ -28,6 +31,8 @@ entity capture_counter is
 	);
 	 
 	port (
+		MRST_N: in std_logic;
+	
 		CAPTURE_ENABLE: in std_logic;	
 		
 		CLK: in std_logic;
@@ -45,49 +50,52 @@ architecture Behavioral of capture_counter is
 	signal COUNTER: std_logic_vector(WIDTH - 1 downto 0);
 	signal WAIT_RESET: std_logic;
 	
-	TYPE Counter_State_Type IS (armed, holdoff);
-	SIGNAL COUNTER_STATE : Counter_State_Type;
+	signal RST_ARMED: std_logic;
 begin
-	--CounterProcess: process(RST, CLK)
-	CounterProcess: process(CLK)
+	CounterProcess: process(MRST_N , CLK)
 	begin
-		if rising_edge(CLK) then
-			case COUNTER_STATE is
-			
-				when armed =>
+		if MRST_N = '0' then
+			RST_ARMED <= '1';
+			COUNTER <= (others => '0');
+		else
+			if rising_edge(CLK) then
+				if RST_ARMED = '1' then
 					if RST = '1' then
 						COUNTER <= (others => '0');
-						COUNTER_STATE <= holdoff;
+						RST_ARMED <= '0';
 					else
 						COUNTER <= COUNTER + 1;
-						COUNTER_STATE <= armed;
+						RST_ARMED <= '1';
 					end if;
-					
-				when holdoff =>
+				else
 					COUNTER <= COUNTER + 1;
 					if RST = '0' then
-						COUNTER_STATE <= armed;
+						RST_ARMED <= '1';
 					else
-						COUNTER_STATE <= holdoff;
+						RST_ARMED <= '0';
 					end if;
-									
-			end case;
+				end if;
+			end if;
 		end if;
 	end process;
 		
-	--CaptureProcess: process(CAPT, RSTCAPT, CAPTURE_ENABLE, WAIT_RESET)
-	CaptureProcess: process(CLK)
+	CaptureProcess: process(MRST_N, CLK)
 	begin
-		if rising_edge(CLK) then
-			if RSTCAPT = '1' then
-				WAIT_RESET <= '0';
-				INT <= '0';
-			else
-				--if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and rising_edge(CAPT) then
-				if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and CAPT = '1' then
-					LATCH <= COUNTER;
-					WAIT_RESET <= '1';
-					INT <= '1';
+		if MRST_N = '0' then
+			WAIT_RESET <= '0';
+			INT <= '0';
+			LATCH <= (others => '0');
+		else
+			if rising_edge(CLK) then
+				if RSTCAPT = '1' then
+					WAIT_RESET <= '0';
+					INT <= '0';
+				else
+					if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and CAPT = '1' then
+						LATCH <= COUNTER;
+						WAIT_RESET <= '1';
+						INT <= '1';
+					end if;
 				end if;
 			end if;
 		end if;

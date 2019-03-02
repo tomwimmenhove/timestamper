@@ -28,6 +28,9 @@ entity main is
 	);
 	 
 	port (
+		-- Master reset
+		MRST_N : IN  std_logic;
+		
 		-- Counter
 		CLK: in std_logic;
 		RST: in std_logic;
@@ -50,8 +53,6 @@ architecture Behavioral of main is
 	signal COUNT_BYTE_LATCH: std_logic_vector((WIDTH + (((8 - (WIDTH mod 8)) mod 8))) - 1 downto 0);	-- Left-justified byte-aligned representation of the counter latch
 	
 	signal SPI_SDO: std_logic;
-	
-	signal SHORT_PPS: std_logic;
 begin
 	-- Counter instance
 	counter: entity work.capture_counter
@@ -59,6 +60,7 @@ begin
 		WIDTH => WIDTH
 	)
 	port map(
+		MRST_N => MRST_N,
 		CAPTURE_ENABLE => CE_N,
 		CLK => CLK,
 		RST => RST,
