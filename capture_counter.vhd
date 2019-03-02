@@ -44,15 +44,33 @@ end capture_counter;
 architecture Behavioral of capture_counter is
 	signal COUNTER: std_logic_vector(WIDTH - 1 downto 0);
 	signal WAIT_RESET: std_logic;
+	
+	TYPE State_Type IS (armed, holdoff);
+	SIGNAL STATE : State_Type;
 begin
 	CounterProcess: process(RST, CLK)
 	begin
-		if RST = '1' then
-			COUNTER <= (others => '0');
-		else
-			if rising_edge(CLK) then
-				COUNTER <= COUNTER + 1;
-			end if;
+		if rising_edge(CLK) then
+			case STATE is
+			
+				when armed =>
+					if RST = '1' then
+						COUNTER <= (others => '0');
+						STATE <= holdoff;
+					else
+						COUNTER <= COUNTER + 1;
+						STATE <= armed;
+					end if;
+					
+				when holdoff =>
+					COUNTER <= COUNTER + 1;
+					if RST = '0' then
+						STATE <= armed;
+					else
+						STATE <= holdoff;
+					end if;
+									
+			end case;
 		end if;
 	end process;
 		

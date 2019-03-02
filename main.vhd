@@ -23,8 +23,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 entity main is
 	generic (
-		--WIDTH: integer := 4
-		WIDTH: integer := 27
+		WIDTH: integer := 4
+		--WIDTH: integer := 27
 	);
 	 
 	port (
@@ -50,6 +50,8 @@ architecture Behavioral of main is
 	signal COUNT_BYTE_LATCH: std_logic_vector((WIDTH + (((8 - (WIDTH mod 8)) mod 8))) - 1 downto 0);	-- Left-justified byte-aligned representation of the counter latch
 	
 	signal SPI_SDO: std_logic;
+	
+	signal SHORT_PPS: std_logic;
 begin
 	-- Counter instance
 	counter: entity work.capture_counter

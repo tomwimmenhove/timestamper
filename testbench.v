@@ -69,6 +69,10 @@ module testbench;
 		// Reset the count
 		RST = 1;
 		#10;
+		CLK = 1;
+		#10;
+		CLK = 0;
+		#10;
 		RST = 0;
 		#10;
 
@@ -136,10 +140,7 @@ module testbench;
 		// Reset the count
 		RST = 1;
 		#10;
-		RST = 0;
-		#10;
-		
-		
+	
 		// Count some more
 		for (x=0; x < 10; x= x+1)
 		begin
@@ -148,6 +149,11 @@ module testbench;
 			CLK = 0;
 			#10;
 		end // end of for loop
+
+		// reset pulse is looooong
+		RST = 0;
+		#10;
+
 
 		// Capture pulse while we already have something in the capture latch. Should be ignored
 		CAPT = 1;
