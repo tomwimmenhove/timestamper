@@ -45,47 +45,52 @@ architecture Behavioral of capture_counter is
 	signal COUNTER: std_logic_vector(WIDTH - 1 downto 0);
 	signal WAIT_RESET: std_logic;
 	
-	TYPE State_Type IS (armed, holdoff);
-	SIGNAL STATE : State_Type;
+	TYPE Counter_State_Type IS (armed, holdoff);
+	SIGNAL COUNTER_STATE : Counter_State_Type;
 begin
-	CounterProcess: process(RST, CLK)
+	--CounterProcess: process(RST, CLK)
+	CounterProcess: process(CLK)
 	begin
 		if rising_edge(CLK) then
-			case STATE is
+			case COUNTER_STATE is
 			
 				when armed =>
 					if RST = '1' then
 						COUNTER <= (others => '0');
-						STATE <= holdoff;
+						COUNTER_STATE <= holdoff;
 					else
 						COUNTER <= COUNTER + 1;
-						STATE <= armed;
+						COUNTER_STATE <= armed;
 					end if;
 					
 				when holdoff =>
 					COUNTER <= COUNTER + 1;
 					if RST = '0' then
-						STATE <= armed;
+						COUNTER_STATE <= armed;
 					else
-						STATE <= holdoff;
+						COUNTER_STATE <= holdoff;
 					end if;
 									
 			end case;
 		end if;
 	end process;
 		
-	CaptureProcess: process(CAPT, RSTCAPT, CAPTURE_ENABLE, WAIT_RESET)
+	--CaptureProcess: process(CAPT, RSTCAPT, CAPTURE_ENABLE, WAIT_RESET)
+	CaptureProcess: process(CLK)
 	begin
-		if RSTCAPT = '1' then
-			WAIT_RESET <= '0';
-		else
-			if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and rising_edge(CAPT) then
-				LATCH <= COUNTER;
-				WAIT_RESET <= '1';
+		if rising_edge(CLK) then
+			if RSTCAPT = '1' then
+				WAIT_RESET <= '0';
+				INT <= '0';
+			else
+				--if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and rising_edge(CAPT) then
+				if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and CAPT = '1' then
+					LATCH <= COUNTER;
+					WAIT_RESET <= '1';
+					INT <= '1';
+				end if;
 			end if;
 		end if;
-		
-		INT <= WAIT_RESET;
 	end process;
 end Behavioral;
 
