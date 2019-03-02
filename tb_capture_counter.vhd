@@ -1,139 +1,139 @@
 --------------------------------------------------------------------------------
--- Company: 
--- Engineer:
+-- company: 
+-- engineer:
 --
--- Create Date:   19:33:50 03/01/2019
--- Design Name:   
--- Module Name:   /home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/tb_capture_counter.vhd
--- Project Name:  capture_counter
--- Target Device:  
--- Tool versions:  
--- Description:   
+-- create date:   19:33:50 03/01/2019
+-- design name:   
+-- module name:   /home/tom/grive-tom.wimmenhove/projects/cosmic/hardware/capture_counter/tb_capture_counter.vhd
+-- project name:  capture_counter
+-- target device:  
+-- tool versions:  
+-- description:   
 -- 
--- VHDL Test Bench Created by ISE for module: capture_counter
+-- vhdl test bench created by ise for module: capture_counter
 -- 
--- Dependencies:
+-- dependencies:
 -- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
+-- revision:
+-- revision 0.01 - file created
+-- additional comments:
 --
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
+-- notes: 
+-- this testbench has been automatically generated using types std_logic and
+-- std_logic_vector for the ports of the unit under test.  xilinx recommends
+-- that these types always be used for the top-level i/o of a design in order
 -- to guarantee that the testbench will bind correctly to the post-implementation 
 -- simulation model.
 --------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
+-- uncomment the following library declaration if using
+-- arithmetic functions with signed or unsigned values
+--use ieee.numeric_std.all;
  
-ENTITY tb_capture_counter IS
+entity tb_capture_counter is
 	generic (
-		WIDTH: integer := 4
+		width: integer := 4
 	);
-END tb_capture_counter;
+end tb_capture_counter;
  
-ARCHITECTURE behavior OF tb_capture_counter IS 
+architecture behavior of tb_capture_counter is 
  
-    -- Component Declaration for the Unit Under Test (UUT)
+    -- component declaration for the unit under test (uut)
  
-    COMPONENT capture_counter
+    component capture_counter
 	 	generic (
-		WIDTH: integer := WIDTH
+		width: integer := width
 	);
-	 PORT(
-			MRST_N : IN  std_logic;
-         CAPTURE_ENABLE : IN  std_logic;
-         CLK : IN  std_logic;
-         RST : IN  std_logic;
-         CAPT : IN  std_logic;
-         RSTCAPT : IN  std_logic;
-         LATCH : OUT  std_logic_vector(WIDTH - 1 downto 0);
-         INT : OUT  std_logic
+	 port(
+			mrst_n : in  std_logic;
+         capture_enable : in  std_logic;
+         clk : in  std_logic;
+         rst : in  std_logic;
+         capt : in  std_logic;
+         rstcapt : in  std_logic;
+         latch : out  std_logic_vector(width - 1 downto 0);
+         int : out  std_logic
         );
-    END COMPONENT;
+    end component;
 
-   --Inputs
-	signal MRST_N : std_logic := '0';
-   signal CAPTURE_ENABLE : std_logic := '0';
-   signal CLK : std_logic := '0';
-   signal RST : std_logic := '0';
-   signal CAPT : std_logic := '0';
-   signal RSTCAPT : std_logic := '0';
+   --inputs
+	signal mrst_n : std_logic := '0';
+   signal capture_enable : std_logic := '0';
+   signal clk : std_logic := '0';
+   signal rst : std_logic := '0';
+   signal capt : std_logic := '0';
+   signal rstcapt : std_logic := '0';
 
- 	--Outputs
-   signal LATCH : std_logic_vector(WIDTH- 1 downto 0);
-   signal INT : std_logic;
+ 	--outputs
+   signal latch : std_logic_vector(width- 1 downto 0);
+   signal int : std_logic;
 
-   -- Clock period definitions
-   constant CLK_period : time := 10 ns;
+   -- clock period definitions
+   constant clk_period : time := 10 ns;
  
-BEGIN
+begin
  
-	-- Instantiate the Unit Under Test (UUT)
-   uut: capture_counter PORT MAP (
-		MRST_N => MRST_N,
-		CAPTURE_ENABLE => CAPTURE_ENABLE,
-		CLK => CLK,
-		RST => RST,
-		CAPT => CAPT,
-		RSTCAPT => RSTCAPT,
-		LATCH => LATCH,
-		INT => INT
+	-- instantiate the unit under test (uut)
+   uut: capture_counter port map (
+		mrst_n => mrst_n,
+		capture_enable => capture_enable,
+		clk => clk,
+		rst => rst,
+		capt => capt,
+		rstcapt => rstcapt,
+		latch => latch,
+		int => int
 	);
 
-   -- Clock process definitions
-   CLK_process :process
+   -- clock process definitions
+   clk_process :process
    begin
-		CLK <= '0';
-		wait for CLK_period/2;
-		CLK <= '1';
-		wait for CLK_period/2;
+		clk <= '0';
+		wait for clk_period/2;
+		clk <= '1';
+		wait for clk_period/2;
    end process;
  
 
-   -- Stimulus process
+   -- stimulus process
    stim_proc: process
    begin
-		MRST_N <= '0';
-		wait for CLK_period * 10;
-		MRST_N <= '1';
-		wait for CLK_period * 1;
+		mrst_n <= '0';
+		wait for clk_period * 10;
+		mrst_n <= '1';
+		wait for clk_period * 1;
 		
-		CAPTURE_ENABLE <= '1';
+		capture_enable <= '1';
 		
-		wait for CLK_period;
+		wait for clk_period;
 
-		CAPT <= '1';
-		wait for CLK_period * 3;
-		CAPT <= '0';
+		capt <= '1';
+		wait for clk_period * 3;
+		capt <= '0';
 		
-		wait for CLK_period;
+		wait for clk_period;
 		
-		RSTCAPT <= '1';
-		wait for CLK_period * 3;
-		RSTCAPT <= '0';
+		rstcapt <= '1';
+		wait for clk_period * 3;
+		rstcapt <= '0';
 
-		wait for CLK_period * 14;
-		CAPT <= '1';
-		wait for CLK_period;
-		CAPT <= '0';
+		wait for clk_period * 14;
+		capt <= '1';
+		wait for clk_period;
+		capt <= '0';
 
-		CAPT <= '1';
-		wait for CLK_period;
-		CAPT <= '0';
+		capt <= '1';
+		wait for clk_period;
+		capt <= '0';
 		
-		RST <= '1';
-		wait for CLK_period * 3;
-		RST <= '0';
+		rst <= '1';
+		wait for clk_period * 3;
+		rst <= '0';
 		
 		
       wait;
    end process;
 
-END;
+end;

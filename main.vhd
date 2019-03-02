@@ -1,91 +1,91 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- company: 
+-- engineer: Tom Wimmenhove
 -- 
--- Create Date:    14:48:25 02/24/2019 
--- Design Name: 
--- Module Name:    main - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- create date:    14:48:25 02/24/2019 
+-- design name: 
+-- module name:    main - behavioral 
+-- project name: 
+-- target devices: 
+-- tool versions: 
+-- description: 
 --
--- Dependencies: 
+-- dependencies: 
 --
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- revision: 
+-- revision 0.01 - file created
+-- additional comments: 
 --
 ----------------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 entity main is
 	generic (
-		WIDTH: integer := 4
-		--WIDTH: integer := 27
+		width: integer := 27 -- fits 100mhz*1s
 	);
 	 
 	port (
-		-- Master reset
-		MRST_N : IN  std_logic;
+		-- master reset
+		mrst_n : in  std_logic;
 		
-		-- Counter
-		CLK: in std_logic;
-		RST: in std_logic;
-		-- Counter capture
-		CAPT: in std_logic;
-		RSTCAPT: in std_logic;
+		-- counter
+		clk: in std_logic;
+		pps: in std_logic;
+		
+		-- counter capture
+		capt: in std_logic;
+		rstcapt: in std_logic;
 			
-		-- SPI output
-		SCLK: in std_logic;
-		CE_N: in std_logic;
-		SDO: out std_logic;
+		-- serial output
+		sclk: in std_logic;
+		ce_n: in std_logic;
+		sdo: out std_logic;
 		
 		-- '1' when there's captured data
-		INT: out std_logic
+		int: out std_logic
 	);
 end main;
 
-architecture Behavioral of main is
-	signal COUNT_LATCH: std_logic_vector(WIDTH - 1 downto 0);	-- The counter (capture) latch
-	signal COUNT_BYTE_LATCH: std_logic_vector((WIDTH + (((8 - (WIDTH mod 8)) mod 8))) - 1 downto 0);	-- Left-justified byte-aligned representation of the counter latch
+architecture behavioral of main is
+	signal count_latch: std_logic_vector(width - 1 downto 0);	-- the counter (capture) latch
+	signal count_byte_latch: std_logic_vector((width + (((8 - (width mod 8)) mod 8))) - 1 downto 0);	-- left-justified byte-aligned representation of the counter latch
 	
-	signal SPI_SDO: std_logic;
+	signal spi_sdo: std_logic;
 begin
-	-- Counter instance
-	counter: entity work.capture_counter
+	-- counter instance
+	i_capture_counter_ts: entity work.capture_counter
 	generic map(
-		WIDTH => WIDTH
+		width => width
 	)
 	port map(
-		MRST_N => MRST_N,
-		CAPTURE_ENABLE => CE_N,
-		CLK => CLK,
-		RST => RST,
-		CAPT => CAPT,
-		RSTCAPT => RSTCAPT,
-		LATCH => COUNT_LATCH,
-		INT => INT
+		mrst_n => mrst_n,
+		capture_enable => ce_n, -- don't capture duing an spi transaction.
+		clk => clk,
+		rst => pps,					-- reset on pps pulse
+		capt => capt,
+		rstcapt => rstcapt,
+		latch => count_latch,
+		int => int
 	);
 	
-	-- Align the counter value
-	COUNT_BYTE_LATCH <= std_logic_vector(resize(unsigned(COUNT_LATCH), COUNT_BYTE_LATCH'length));
+	-- align the counter value
+	count_byte_latch <= std_logic_vector(resize(unsigned(count_latch), count_byte_latch'length));
 
-	-- Only drive the SDO pin (with SPI_SDO) when chip_select is assreted (low)
-	with CE_N select SDO <= SPI_SDO when '0', 'Z' when others;
+	-- only drive the sdo pin (with spi_sdo) when chip_select is assreted (low)
+	with ce_n select sdo <= spi_sdo when '0', 'Z' when others;
 
-	-- SPI instance
-	spi: entity work.serial_out
+	-- spi instance
+	i_spi_out: entity work.serial_out
 	generic map(
-		TXWIDTH => COUNT_BYTE_LATCH'length
+		txwidth => count_byte_latch'length
 	)
 	port map(
-		TXREG => COUNT_BYTE_LATCH,
-		SCLK => SCLK,
-		CE_N => CE_N,
-		SDO => SPI_SDO
+		txreg => count_byte_latch,
+		sclk => sclk,
+		ce_n => ce_n,
+		sdo => spi_sdo
 	);
-end Behavioral;
+end behavioral;
 

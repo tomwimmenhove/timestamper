@@ -1,104 +1,102 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- company: 
+-- engineer: Tom Wimmenhove
 -- 
--- Create Date:    19:00:21 02/26/2019 
--- Design Name: 
--- Module Name:    capture_counter - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: Increase count on clk. Reset count on first clock with rst asserted.
---              Capture count into latch on first rising clock edge with capt asserted.
---              Capture disabled after capture until first rising clock edge with rstcap asserted.
---              Int is high when new data on the latch. Rstcap clears int.
+-- create date:    19:00:21 02/26/2019 
+-- design name:    timestamp capture counter
+-- module name:    capture_counter - behavioral 
+-- project name: 
+-- target devices: 
+-- tool versions: 
+-- description: captures the time of capture pulses
+-- 
 --
--- Dependencies: 
+-- dependencies: 
 --
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- revision: 
+-- revision 0.01 - file created
+-- additional comments: 
 --
 ----------------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 entity capture_counter is
 	generic (
-		WIDTH: integer := 8
+		width: integer := 8
 	);
 	 
 	port (
-		MRST_N: in std_logic;
+		mrst_n: in std_logic;				-- master reset
 	
-		CAPTURE_ENABLE: in std_logic;	
+		capture_enable: in std_logic;		-- enable capturing (active high)
 		
-		CLK: in std_logic;
-		RST: in std_logic;
+		clk: in std_logic;					-- 100mhz clock input
+		rst: in std_logic;					-- synchronous reset (resets when high on first rising clock pulse)
 		
-		CAPT: in std_logic;
-		RSTCAPT: in std_logic;
+		capt: in std_logic;					-- synchronous capture current count into latch (high while first rising clock pulse), then disables capturing
+		rstcapt: in std_logic;				-- synchronous re-enable of capturing (high while first rising clock pulse)
 		
-		LATCH: out std_logic_vector(WIDTH - 1 downto 0);
-		INT: out std_logic
+		latch: out std_logic_vector(width - 1 downto 0);	-- output latch containing the captured count
+		int: out std_logic					-- high when new data available in latch
 	);
 end capture_counter;
 
-architecture Behavioral of capture_counter is
-	signal COUNTER: std_logic_vector(WIDTH - 1 downto 0);
-	signal WAIT_RESET: std_logic;
+architecture behavioral of capture_counter is
+	signal counter: std_logic_vector(width - 1 downto 0);
+	signal wait_reset: std_logic;
 	
-	signal RST_ARMED: std_logic;
+	signal rst_armed: std_logic;
 begin
-	CounterProcess: process(MRST_N , CLK)
+	counterprocess: process(mrst_n , clk)
 	begin
-		if MRST_N = '0' then
-			RST_ARMED <= '1';
-			COUNTER <= (others => '0');
+		if mrst_n = '0' then
+			rst_armed <= '1';
+			counter <= (others => '0');
 		else
-			if rising_edge(CLK) then
-				if RST_ARMED = '1' then
-					if RST = '1' then
-						COUNTER <= (others => '0');
-						RST_ARMED <= '0';
+			if rising_edge(clk) then
+				if rst_armed = '1' then
+					if rst = '1' then
+						counter <= (others => '0');
+						rst_armed <= '0';
 					else
-						COUNTER <= COUNTER + 1;
-						RST_ARMED <= '1';
+						counter <= counter + 1;
+						rst_armed <= '1';
 					end if;
 				else
-					COUNTER <= COUNTER + 1;
-					if RST = '0' then
-						RST_ARMED <= '1';
+					counter <= counter + 1;
+					if rst = '0' then
+						rst_armed <= '1';
 					else
-						RST_ARMED <= '0';
+						rst_armed <= '0';
 					end if;
 				end if;
 			end if;
 		end if;
 	end process;
 		
-	CaptureProcess: process(MRST_N, CLK)
+	captureprocess: process(mrst_n, clk)
 	begin
-		if MRST_N = '0' then
-			WAIT_RESET <= '0';
-			INT <= '0';
-			LATCH <= (others => '0');
+		if mrst_n = '0' then
+			wait_reset <= '0';
+			int <= '0';
+			latch <= (others => '0');
 		else
-			if rising_edge(CLK) then
-				if RSTCAPT = '1' then
-					WAIT_RESET <= '0';
-					INT <= '0';
+			if rising_edge(clk) then
+				if rstcapt = '1' then
+					wait_reset <= '0';
+					int <= '0';
 				else
-					if CAPTURE_ENABLE = '1' and WAIT_RESET = '0' and CAPT = '1' then
-						LATCH <= COUNTER;
-						WAIT_RESET <= '1';
-						INT <= '1';
+					if capture_enable = '1' and wait_reset = '0' and capt = '1' then
+						latch <= counter;
+						wait_reset <= '1';
+						int <= '1';
 					end if;
 				end if;
 			end if;
 		end if;
 	end process;
-end Behavioral;
+end behavioral;
 

@@ -1,58 +1,58 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- company: 
+-- engineer: Tom Wimmenhove
 -- 
--- Create Date:    18:29:33 02/26/2019 
--- Design Name: 
--- Module Name:    serial_out - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- create date:    18:29:33 02/26/2019 
+-- design name: 
+-- module name:    serial_out - behavioral 
+-- project name: 
+-- target devices: 
+-- tool versions: 
+-- description: Serially clock out the contents of txreg
 --
--- Dependencies: 
+-- dependencies: 
 --
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
+-- revision: 
+-- revision 0.01 - file created
+-- additional comments: 
 --
 ----------------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 entity serial_out is
 	generic (
-		TXWIDTH: integer := 8;
-		BMUXWIDTH: integer := 5
+		txwidth: integer := 8;
+		bmuxwidth: integer := 5
 	);
 	
 	port (
-		TXREG: in std_logic_vector(TXWIDTH - 1 downto 0);
-		SCLK: in std_logic;
-		CE_N: in std_logic;
-		SDO: out std_logic
+		txreg: in std_logic_vector(txwidth - 1 downto 0);
+		sclk: in std_logic;
+		ce_n: in std_logic;
+		sdo: out std_logic
 	);
 end serial_out;
 
-architecture Behavioral of serial_out is
-	signal BMUX: std_logic_vector(BMUXWIDTH - 1 downto 0);
+architecture behavioral of serial_out is
+	signal bmux: std_logic_vector(bmuxwidth - 1 downto 0);
 begin
-	--SDO <= TXREG(TXWIDTH - to_integer(unsigned(BMUX)) - 1);
+	--sdo <= txreg(txwidth - to_integer(unsigned(bmux)) - 1);
 
-	SpiOutProcess: process(SCLK, CE_N, BMUX)
+	spioutprocess: process(sclk, ce_n, bmux)
 	begin
-		if CE_N = '1' then
-			BMUX <= (others => '0');
+		if ce_n = '1' then
+			bmux <= (others => '0');
 		else
-			if falling_edge(SCLK) then -- CPOL == CPHA == 0
-				BMUX <= BMUX + 1;
+			if falling_edge(sclk) then -- cpol == cpha == 0
+				bmux <= bmux + 1;
 			end if;
 		end if;
 		
-		if to_integer(unsigned(BMUX)) < TXWIDTH then
-			SDO <= TXREG(TXWIDTH - to_integer(unsigned(BMUX)) - 1);
+		if to_integer(unsigned(bmux)) < txwidth then
+			sdo <= txreg(txwidth - to_integer(unsigned(bmux)) - 1);
 		end if;
 	end process;
-end Behavioral;
+end behavioral;

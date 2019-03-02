@@ -1,124 +1,124 @@
 --------------------------------------------------------------------------------
--- Company: 
--- Engineer:
+-- company: 
+-- engineer:
 --
--- Create Date:   20:03:41 03/01/2019
--- Design Name:   
--- Module Name:   /home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/tb_serial_out.vhd
--- Project Name:  capture_counter
--- Target Device:  
--- Tool versions:  
--- Description:   
+-- create date:   20:03:41 03/01/2019
+-- design name:   
+-- module name:   /home/tom/grive-tom.wimmenhove/projects/cosmic/hardware/capture_counter/tb_serial_out.vhd
+-- project name:  capture_counter
+-- target device:  
+-- tool versions:  
+-- description:   
 -- 
--- VHDL Test Bench Created by ISE for module: serial_out
+-- vhdl test bench created by ise for module: serial_out
 -- 
--- Dependencies:
+-- dependencies:
 -- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
+-- revision:
+-- revision 0.01 - file created
+-- additional comments:
 --
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
+-- notes: 
+-- this testbench has been automatically generated using types std_logic and
+-- std_logic_vector for the ports of the unit under test.  xilinx recommends
+-- that these types always be used for the top-level i/o of a design in order
 -- to guarantee that the testbench will bind correctly to the post-implementation 
 -- simulation model.
 --------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
+-- uncomment the following library declaration if using
+-- arithmetic functions with signed or unsigned values
+--use ieee.numeric_std.all;
  
-ENTITY tb_serial_out IS
-END tb_serial_out;
+entity tb_serial_out is
+end tb_serial_out;
  
-ARCHITECTURE behavior OF tb_serial_out IS 
+architecture behavior of tb_serial_out is 
  
-    -- Component Declaration for the Unit Under Test (UUT)
+    -- component declaration for the unit under test (uut)
  
-    COMPONENT serial_out
-    PORT(
-         TXREG : IN  std_logic_vector(7 downto 0);
-         SCLK : IN  std_logic;
-         CE_N : IN  std_logic;
-         SDO : OUT  std_logic
+    component serial_out
+    port(
+         txreg : in  std_logic_vector(7 downto 0);
+         sclk : in  std_logic;
+         ce_n : in  std_logic;
+         sdo : out  std_logic
         );
-    END COMPONENT;
+    end component;
     
 
-   --Inputs
-   signal TXREG : std_logic_vector(7 downto 0) := (others => '0');
-   signal SCLK : std_logic := '0';
-   signal CE_N : std_logic := '0';
+   --inputs
+   signal txreg : std_logic_vector(7 downto 0) := (others => '0');
+   signal sclk : std_logic := '0';
+   signal ce_n : std_logic := '0';
 
- 	--Outputs
-   signal SDO : std_logic;
-BEGIN
+ 	--outputs
+   signal sdo : std_logic;
+begin
  
-	-- Instantiate the Unit Under Test (UUT)
-   uut: serial_out PORT MAP (
-          TXREG => TXREG,
-          SCLK => SCLK,
-          CE_N => CE_N,
-          SDO => SDO
+	-- instantiate the unit under test (uut)
+   uut: serial_out port map (
+          txreg => txreg,
+          sclk => sclk,
+          ce_n => ce_n,
+          sdo => sdo
         );
 
-   -- Stimulus process
+   -- stimulus process
    stim_proc: process
-		variable I: integer;
+		variable i: integer;
    begin
-		CE_N <= '1';
+		ce_n <= '1';
 		wait for 10ns;
 		
-		TXREG <= "10101010";
-		CE_N <= '0';
-		for I in 0 to 7 loop
+		txreg <= "10101010";
+		ce_n <= '0';
+		for i in 0 to 7 loop
 			wait for 10ns;
-			SCLK <= '1';
+			sclk <= '1';
 			wait for 10ns;
-			SCLK <= '0';
+			sclk <= '0';
 		end loop;
 		wait for 10ns;
-		CE_N <= '1';
+		ce_n <= '1';
 		
 		wait for 20ns;
 
-		TXREG <= "01010101";
-		CE_N <= '1';
-		for I in 0 to 7 loop
+		txreg <= "01010101";
+		ce_n <= '1';
+		for i in 0 to 7 loop
 			wait for 10ns;
-			SCLK <= '1';
+			sclk <= '1';
 			wait for 10ns;
-			SCLK <= '0';
+			sclk <= '0';
 		end loop;
 		wait for 10ns;
 
-		CE_N <= '0';
+		ce_n <= '0';
 		
 		wait for 10ns;
-		for I in 0 to 7 loop
+		for i in 0 to 7 loop
 			wait for 10ns;
-			SCLK <= '1';
+			sclk <= '1';
 			wait for 10ns;
-			SCLK <= '0';
+			sclk <= '0';
 		end loop;
 
-		CE_N <= '1';
+		ce_n <= '1';
 		
-		for I in 0 to 7 loop
+		for i in 0 to 7 loop
 			wait for 10ns;
-			SCLK <= '1';
+			sclk <= '1';
 			wait for 10ns;
-			SCLK <= '0';
+			sclk <= '0';
 		end loop;
 		wait for 10ns;
-		CE_N <= '1';
+		ce_n <= '1';
 
 
       wait;
    end process;
 
-END;
+end;
