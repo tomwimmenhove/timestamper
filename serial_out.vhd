@@ -25,7 +25,7 @@ use ieee.numeric_std.all;
 entity serial_out is
 	generic (
 		txwidth: integer := 8;
-		bmuxwidth: integer := 4
+		bmuxwidth: integer := 3
 	);
 	
 	port (
