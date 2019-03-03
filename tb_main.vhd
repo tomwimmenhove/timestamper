@@ -47,15 +47,16 @@ architecture behavior of tb_main is
 		width: integer := width
 	 );
     port(
-         mrst_n : in  std_logic;
-         clk : in  std_logic;
-         pps : in  std_logic;
-         capt : in  std_logic;
-         rstcapt : in  std_logic;
-         sclk : in  std_logic;
-         ce_n : in  std_logic;
-         sdo : out  std_logic;
-         int : out  std_logic
+         mrst_n_in : in  std_logic;
+         clk_in : in  std_logic;
+         pps_in : in  std_logic;
+         capt_in : in  std_logic;
+         rst_capt_in : in  std_logic;
+			div_out : out  std_logic;
+         sclk_in : in  std_logic;
+         ce_n_in : in  std_logic;
+         sdo_out : out  std_logic;
+         int_out : out  std_logic
         );
     end component;
     
@@ -65,7 +66,8 @@ architecture behavior of tb_main is
    signal clk : std_logic := '0';
    signal pps : std_logic := '0';
    signal capt : std_logic := '0';
-   signal rstcapt : std_logic := '0';
+   signal rst_capt : std_logic := '0';
+	signal div : std_logic := '0';
    signal sclk : std_logic := '0';
    signal ce_n : std_logic := '0';
 
@@ -80,15 +82,16 @@ begin
  
 	-- instantiate the unit under test (uut)
    uut: main port map (
-          mrst_n => mrst_n,
-          clk => clk,
-          pps => pps,
-          capt => capt,
-          rstcapt => rstcapt,
-          sclk => sclk,
-          ce_n => ce_n,
-          sdo => sdo,
-          int => int
+          mrst_n_in => mrst_n,
+          clk_in => clk,
+          pps_in => pps,
+          capt_in => capt,
+          rst_capt_in => rst_capt,
+			 div_out => div,
+          sclk_in => sclk,
+          ce_n_in => ce_n,
+          sdo_out => sdo,
+          int_out => int
         );
 
    -- clock process definitions
@@ -116,9 +119,9 @@ begin
 		
 		wait for clk_period;
 
-		rstcapt <= '1';
+		rst_capt <= '1';
 		wait for clk_period;
-		rstcapt <= '0';
+		rst_capt <= '0';
 		wait for clk_period ;
 	
 		pps <= '1';

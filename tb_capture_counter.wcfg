@@ -13,45 +13,41 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="10" />
-   <wvobject fp_name="/tb_capture_counter/mrst_n" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">mrst_n</obj_property>
-      <obj_property name="ObjectShortName">mrst_n</obj_property>
+   <WVObjectSize size="9" />
+   <wvobject fp_name="/tb_capture_counter/mrst_n_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mrst_n_in</obj_property>
+      <obj_property name="ObjectShortName">mrst_n_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/capture_enable" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">capture_enable</obj_property>
-      <obj_property name="ObjectShortName">capture_enable</obj_property>
+   <wvobject fp_name="/tb_capture_counter/capture_enable_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">capture_enable_in</obj_property>
+      <obj_property name="ObjectShortName">capture_enable_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/clk" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
+   <wvobject fp_name="/tb_capture_counter/clk_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/rst" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
+   <wvobject fp_name="/tb_capture_counter/rst_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst_in</obj_property>
+      <obj_property name="ObjectShortName">rst_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/capt" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">capt</obj_property>
-      <obj_property name="ObjectShortName">capt</obj_property>
+   <wvobject fp_name="/tb_capture_counter/count_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">count_out[3:0]</obj_property>
+      <obj_property name="ObjectShortName">count_out[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/rstcapt" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">rstcapt</obj_property>
-      <obj_property name="ObjectShortName">rstcapt</obj_property>
+   <wvobject fp_name="/tb_capture_counter/capt_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">capt_in</obj_property>
+      <obj_property name="ObjectShortName">capt_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/latch" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">latch[3:0]</obj_property>
-      <obj_property name="ObjectShortName">latch[3:0]</obj_property>
+   <wvobject fp_name="/tb_capture_counter/capt_count_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">capt_count_out[3:0]</obj_property>
+      <obj_property name="ObjectShortName">capt_count_out[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/int" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">int</obj_property>
-      <obj_property name="ObjectShortName">int</obj_property>
+   <wvobject fp_name="/tb_capture_counter/int_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">int_out</obj_property>
+      <obj_property name="ObjectShortName">int_out</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_capture_counter/uut/counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">counter[3:0]</obj_property>
-      <obj_property name="ObjectShortName">counter[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_capture_counter/capture_enable" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">capture_enable</obj_property>
-      <obj_property name="ObjectShortName">capture_enable</obj_property>
+   <wvobject fp_name="/tb_capture_counter/rst_capt_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst_capt_in</obj_property>
+      <obj_property name="ObjectShortName">rst_capt_in</obj_property>
    </wvobject>
 </wave_config>

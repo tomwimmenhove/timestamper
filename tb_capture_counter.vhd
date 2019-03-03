@@ -47,28 +47,30 @@ architecture behavior of tb_capture_counter is
 		width: integer := width
 	);
 	 port(
-			mrst_n : in  std_logic;
-         capture_enable : in  std_logic;
-         clk : in  std_logic;
-         rst : in  std_logic;
-         capt : in  std_logic;
-         rstcapt : in  std_logic;
-         latch : out  std_logic_vector(width - 1 downto 0);
-         int : out  std_logic
+			mrst_n_in : in  std_logic;
+         capture_enable_in : in  std_logic;
+         clk_in : in  std_logic;
+         rst_in : in  std_logic;
+         capt_in : in  std_logic;
+         rst_capt_in : in  std_logic;
+			count_out: out std_logic_vector(width - 1 downto 0);
+         capt_count_out : out  std_logic_vector(width - 1 downto 0);
+         int_out : out  std_logic
         );
     end component;
 
    --inputs
-	signal mrst_n : std_logic := '0';
-   signal capture_enable : std_logic := '0';
-   signal clk : std_logic := '0';
-   signal rst : std_logic := '0';
-   signal capt : std_logic := '0';
-   signal rstcapt : std_logic := '0';
+	signal mrst_n_in : std_logic := '0';
+   signal capture_enable_in: std_logic := '0';
+   signal clk_in : std_logic := '0';
+   signal rst_in : std_logic := '0';
+   signal capt_in : std_logic := '0';
+   signal rst_capt_in : std_logic := '0';
 
  	--outputs
-   signal latch : std_logic_vector(width- 1 downto 0);
-   signal int : std_logic;
+   signal capt_count_out : std_logic_vector(width- 1 downto 0);
+	signal count_out : std_logic_vector(width- 1 downto 0);
+   signal int_out : std_logic;
 
    -- clock period definitions
    constant clk_period : time := 10 ns;
@@ -77,22 +79,23 @@ begin
  
 	-- instantiate the unit under test (uut)
    uut: capture_counter port map (
-		mrst_n => mrst_n,
-		capture_enable => capture_enable,
-		clk => clk,
-		rst => rst,
-		capt => capt,
-		rstcapt => rstcapt,
-		latch => latch,
-		int => int
+		mrst_n_in => mrst_n_in,
+		capture_enable_in => capture_enable_in,
+		clk_in => clk_in,
+		rst_in => rst_in,
+		capt_in => capt_in,
+		rst_capt_in => rst_capt_in,
+		count_out => count_out,
+		capt_count_out => capt_count_out,
+		int_out => int_out
 	);
 
    -- clock process definitions
    clk_process :process
    begin
-		clk <= '0';
+		clk_in <= '0';
 		wait for clk_period/2;
-		clk <= '1';
+		clk_in <= '1';
 		wait for clk_period/2;
    end process;
  
@@ -100,37 +103,37 @@ begin
    -- stimulus process
    stim_proc: process
    begin
-		mrst_n <= '0';
+		mrst_n_in <= '0';
 		wait for clk_period * 10;
-		mrst_n <= '1';
+		mrst_n_in <= '1';
 		wait for clk_period * 1;
 		
-		capture_enable <= '1';
+		capture_enable_in<= '1';
 		
 		wait for clk_period;
 
-		capt <= '1';
+		capt_in <= '1';
 		wait for clk_period * 3;
-		capt <= '0';
+		capt_in <= '0';
 		
 		wait for clk_period;
 		
-		rstcapt <= '1';
+		rst_capt_in <= '1';
 		wait for clk_period * 3;
-		rstcapt <= '0';
+		rst_capt_in <= '0';
 
 		wait for clk_period * 14;
-		capt <= '1';
+		capt_in <= '1';
 		wait for clk_period;
-		capt <= '0';
+		capt_in <= '0';
 
-		capt <= '1';
+		capt_in <= '1';
 		wait for clk_period;
-		capt <= '0';
+		capt_in <= '0';
 		
-		rst <= '1';
+		rst_in <= '1';
 		wait for clk_period * 3;
-		rst <= '0';
+		rst_in <= '0';
 		
 		
       wait;

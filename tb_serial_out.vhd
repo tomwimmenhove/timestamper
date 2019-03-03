@@ -41,10 +41,10 @@ architecture behavior of tb_serial_out is
  
     component serial_out
     port(
-         txreg : in  std_logic_vector(7 downto 0);
-         sclk : in  std_logic;
-         ce_n : in  std_logic;
-         sdo : out  std_logic
+         txreg_in : in  std_logic_vector(7 downto 0);
+         sclk_in : in  std_logic;
+         ce_n_in : in  std_logic;
+         sdo_out : out  std_logic
         );
     end component;
     
@@ -60,10 +60,10 @@ begin
  
 	-- instantiate the unit under test (uut)
    uut: serial_out port map (
-          txreg => txreg,
-          sclk => sclk,
-          ce_n => ce_n,
-          sdo => sdo
+          txreg_in => txreg,
+          sclk_in => sclk,
+          ce_n_in => ce_n,
+          sdo_out => sdo
         );
 
    -- stimulus process
