@@ -42,7 +42,6 @@
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGC" xil_pn:name="main.ngc"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGD" xil_pn:name="main.ngd"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGR" xil_pn:name="main.ngr"/>
-    <file xil_pn:fileType="FILE_PAD_MISC" xil_pn:name="main.pad"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PNX" xil_pn:name="main.pnx"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="main.prj"/>
     <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="main.rpt"/>
@@ -53,12 +52,11 @@
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_VM6" xil_pn:name="main.vm6"/>
     <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="main.xml"/>
     <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST" xil_pn:name="main.xst"/>
-    <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="main_build.xml"/>
     <file xil_pn:fileType="FILE_HTML" xil_pn:name="main_envsettings.html"/>
     <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="main_html"/>
     <file xil_pn:fileType="FILE_XRPT" xil_pn:name="main_ngdbuild.xrpt"/>
-    <file xil_pn:fileType="FILE_PAD_EXCEL_REPORT" xil_pn:name="main_pad.csv"/>
     <file xil_pn:fileType="FILE_HTML" xil_pn:name="main_summary.html"/>
+    <file xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="main_vhdl.prj"/>
     <file xil_pn:fileType="FILE_XRPT" xil_pn:name="main_xst.xrpt"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="tb_capture_counter_isim_beh.exe"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="tb_main_isim_beh.exe"/>
@@ -79,6 +77,10 @@
     <transform xil_pn:end_ts="1551648519" xil_pn:in_ck="2616774215319665917" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1551648519">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="capture_counter.vhd"/>
       <outfile xil_pn:name="main.vhd"/>
       <outfile xil_pn:name="serial_out.vhd"/>
@@ -93,6 +95,11 @@
     <transform xil_pn:end_ts="1551648519" xil_pn:in_ck="2616774215319665917" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1551648519">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="capture_counter.vhd"/>
       <outfile xil_pn:name="main.vhd"/>
       <outfile xil_pn:name="serial_out.vhd"/>
@@ -103,27 +110,32 @@
     <transform xil_pn:end_ts="1551648521" xil_pn:in_ck="2616774215319665917" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="1024788234049395170" xil_pn:start_ts="1551648519">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
       <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
       <status xil_pn:value="OutputChanged"/>
+      <status xil_pn:value="OutputRemoved"/>
       <outfile xil_pn:name="fuse.log"/>
       <outfile xil_pn:name="isim"/>
       <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="tb_serial_out_beh.prj"/>
       <outfile xil_pn:name="tb_serial_out_isim_beh.exe"/>
       <outfile xil_pn:name="xilinxsim.ini"/>
     </transform>
     <transform xil_pn:end_ts="1551648521" xil_pn:in_ck="-7419851999720626083" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="9084701638696114319" xil_pn:start_ts="1551648521">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="OutputRemoved"/>
       <outfile xil_pn:name="isim.cmd"/>
       <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="tb_serial_out_isim_beh.wdb"/>
     </transform>
     <transform xil_pn:end_ts="1551494927" xil_pn:name="TRAN_schematicsToHdl" xil_pn:prop_ck="-81510909773601512" xil_pn:start_ts="1551494927">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1551648101" xil_pn:in_ck="6947440789107467775" xil_pn:name="TRANEXT_xstsynthesize_xc9500xl" xil_pn:prop_ck="8510417859681171115" xil_pn:start_ts="1551648094">
+    <transform xil_pn:end_ts="1551975290" xil_pn:in_ck="6947440789107467775" xil_pn:name="TRANEXT_xstsynthesize_xc9500xl" xil_pn:prop_ck="4333076880464308607" xil_pn:start_ts="1551975284">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="WarningsGenerated"/>
       <status xil_pn:value="ReadyToRun"/>
@@ -141,11 +153,11 @@
       <outfile xil_pn:name="webtalk_pn.xml"/>
       <outfile xil_pn:name="xst"/>
     </transform>
-    <transform xil_pn:end_ts="1551648210" xil_pn:in_ck="4774924128945" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="5371460859456800637" xil_pn:start_ts="1551648210">
+    <transform xil_pn:end_ts="1551918777" xil_pn:in_ck="4774924128945" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="5371460859456800637" xil_pn:start_ts="1551918777">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1551648215" xil_pn:in_ck="-5850685518144584932" xil_pn:name="TRAN_ngdbuild" xil_pn:prop_ck="920057667651985957" xil_pn:start_ts="1551648210">
+    <transform xil_pn:end_ts="1551975295" xil_pn:in_ck="-5850685518144584932" xil_pn:name="TRAN_ngdbuild" xil_pn:prop_ck="-736101761533034375" xil_pn:start_ts="1551975290">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
@@ -155,26 +167,19 @@
       <outfile xil_pn:name="main.ngd"/>
       <outfile xil_pn:name="main_ngdbuild.xrpt"/>
     </transform>
-    <transform xil_pn:end_ts="1551648220" xil_pn:in_ck="4774924121452" xil_pn:name="TRANEXT_vm6File_xc9500xl" xil_pn:prop_ck="-3597960317485907652" xil_pn:start_ts="1551648215">
-      <status xil_pn:value="SuccessfullyRun"/>
+    <transform xil_pn:end_ts="1551975446" xil_pn:in_ck="4774924121452" xil_pn:name="TRANEXT_vm6File_xc9500xl" xil_pn:prop_ck="8391968944886135825" xil_pn:start_ts="1551975439">
+      <status xil_pn:value="FailedRun"/>
       <status xil_pn:value="WarningsGenerated"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
-      <outfile xil_pn:name="main.gyd"/>
-      <outfile xil_pn:name="main.mfd"/>
-      <outfile xil_pn:name="main.nga"/>
-      <outfile xil_pn:name="main.pad"/>
-      <outfile xil_pn:name="main.pnx"/>
       <outfile xil_pn:name="main.rpt"/>
       <outfile xil_pn:name="main.tim"/>
       <outfile xil_pn:name="main.tspec"/>
-      <outfile xil_pn:name="main.vm6"/>
       <outfile xil_pn:name="main.xml"/>
-      <outfile xil_pn:name="main_build.xml"/>
       <outfile xil_pn:name="main_html"/>
-      <outfile xil_pn:name="main_pad.csv"/>
     </transform>
-    <transform xil_pn:end_ts="1551648221" xil_pn:in_ck="4774924130316" xil_pn:name="TRANEXT_crtProg_xc9500" xil_pn:prop_ck="-8575611731018040264" xil_pn:start_ts="1551648220">
+    <transform xil_pn:end_ts="1551967619" xil_pn:in_ck="4774924130316" xil_pn:name="TRANEXT_crtProg_xc9500" xil_pn:prop_ck="-8575611731018040264" xil_pn:start_ts="1551967618">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
