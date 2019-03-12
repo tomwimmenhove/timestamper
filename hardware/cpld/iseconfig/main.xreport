@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2019-03-06T17:32:02</DateModified>
+  <DateModified>2019-03-12T18:32:18</DateModified>
   <ModuleName>main</ModuleName>
   <SummaryTimeStamp>2019-03-06T17:31:07</SummaryTimeStamp>
-  <SavedFilePath>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/iseconfig/main.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/</ImplementationReportsDirectory>
+  <SavedFilePath>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/timestamper/hardware/cpld/iseconfig/main.xreport</SavedFilePath>
+  <ImplementationReportsDirectory>/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/timestamper/hardware/cpld/</ImplementationReportsDirectory>
   <DateInitialized>2019-02-24T14:48:25</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>

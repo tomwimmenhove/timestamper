@@ -1,0 +1,23 @@
+
+#PINLOCK_BEGIN
+
+#Wed Feb 27 21:00:19 2019
+
+NET "CAPT_IN"				LOC =  "S:PIN23";
+#NET "CLK_IN"				LOC =  "S:PIN1";
+NET "CLK_IN"				LOC =  "S:PIN43";
+NET "PPS_IN"				LOC =  "S:PIN44";
+
+NET "SCLK_IN"				LOC =  "S:PIN12";
+NET "CE_N_IN"				LOC =  "S:PIN13";
+NET "RST_CAPT_IN"			LOC =  "S:PIN8"; # Pin 14 was always high?!
+NET "INT_OUT"				LOC =  "S:PIN16";
+NET "SDO_OUT"				LOC =  "S:PIN18";
+NET "MRST_N_IN"			LOC =  "S:PIN19";
+
+NET "DIV_OUT"				LOC =  "S:PIN34";
+NET "LED3_OUT"				LOC =  "S:PIN33";
+NET "LED4_OUT"				LOC =  "S:PIN32";
+NET "LED5_OUT"				LOC =  "S:PIN31";
+
+#PINLOCK_END
