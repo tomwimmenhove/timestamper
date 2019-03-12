@@ -1,0 +1,5 @@
+https://github.com/automote/kicad-library/blob/master/library/cp2102.lib
+https://github.com/tylerl/kicad-ch34x
+https://git.tiband.de/toy/computer/ for the Xilinx CPLD library
+https://github.com/joeferner/kicad-library/ For TVS
+https://github.com/KiCad/TO_SOT_Packages_SMD.pretty
