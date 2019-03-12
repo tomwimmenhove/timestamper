@@ -48,13 +48,13 @@ entity main is
 		sdo_out: out std_logic;
 		
 		-- high when there's captured data
-		int_out: out std_logic
+		int_out: out std_logic;
 		
 		-- Test outputs
---		led2_out: out std_logic;
---		led3_out: out std_logic;
---		led4_out: out std_logic;
---		led5_out: out std_logic
+		--led2_out: out std_logic;
+		led3_out: out std_logic;
+		led4_out: out std_logic;
+		led5_out: out std_logic
 	);
 end main;
 
@@ -75,7 +75,6 @@ begin
 	syncprocess: process(clk_in)
 	begin
 		if falling_edge(clk_in) then
-		--if rising_edge(clk_in) then
 			pps_in_sync <= pps_in;
 			capt_in_sync <= capt_in;
 			rst_capt_in_sync <= rst_capt_in;
@@ -104,8 +103,8 @@ begin
 	--led5_out <= '0';
 	
 	--led2_out <= count(width - 1);
-	--led3_out <= not pps_in_sync;
-	--led4_out <= not capt_in;
+	led3_out <= not pps_in_sync;
+	led4_out <= not capt_in;
 
 	-- align the counter value
 	capt_count_byte_align <= std_logic_vector(resize(unsigned(capt_count), capt_count_byte_align'length));
