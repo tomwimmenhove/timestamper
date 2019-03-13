@@ -1,1 +1,1 @@
--intstyle "ise" -incremental -o "/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/tb_serial_out_isim_beh.exe" -prj "/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/hardware/capture_counter/tb_serial_out_beh.prj" "work.tb_serial_out" 
+-intstyle "ise" -incremental -o "/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/timestamper/hardware/cpld/tb_main_isim_beh.exe" -prj "/home/tom/grive-Tom.Wimmenhove/Projects/cosmic/timestamper/hardware/cpld/tb_main_beh.prj" "work.tb_main" 
