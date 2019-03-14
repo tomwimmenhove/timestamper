@@ -163,7 +163,7 @@ U 1 1 5C8463D4
 P 12550 6950
 F 0 "Y2" H 12550 7100 50  0000 C CNN
 F 1 "8MHz" H 12550 6800 50  0000 C CNN
-F 2 "Crystals:Crystal_SMD_HC49-SD" H 12550 6950 50  0001 C CNN
+F 2 "Crystal:Crystal_HC49-4H_Vertical" H 12550 6950 50  0001 C CNN
 F 3 "" H 12550 6950 50  0001 C CNN
 	1    12550 6950
 	0    1    1    0   
@@ -513,7 +513,7 @@ Text Label 3000 1200 0    60   ~ 0
 PPS_N
 Text Label 3000 2000 0    60   ~ 0
 CAPTURE_N
-Text Label 6750 3200 2    60   ~ 0
+Text Label 8100 950  1    60   ~ 0
 PPS_N
 $Comp
 L power:GND #PWR018
@@ -668,7 +668,7 @@ F 3 "" H 1150 5400 50  0001 C CNN
 	1    1150 5400
 	1    0    0    -1  
 $EndComp
-Text Label 7500 3950 3    60   ~ 0
+Text Label 7650 950  1    60   ~ 0
 CAPTURE_N
 Text Label 3350 5750 0    60   ~ 0
 MCLK_100MHZ
@@ -1191,17 +1191,6 @@ F 3 "" H 750 9450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+5V #PWR052
-U 1 1 5C86D55E
-P 750 10350
-F 0 "#PWR052" H 750 10200 50  0001 C CNN
-F 1 "+5V" H 750 10490 50  0000 C CNN
-F 2 "" H 750 10350 50  0001 C CNN
-F 3 "" H 750 10350 50  0001 C CNN
-	1    750  10350
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:+3.3V #PWR053
 U 1 1 5C86DD19
 P 1750 9400
@@ -1332,7 +1321,7 @@ U 1 1 5C8752EA
 P 3550 10200
 F 0 "Y1" H 3550 10350 50  0000 C CNN
 F 1 "12MHz" H 3550 10050 50  0000 C CNN
-F 2 "Crystals:Crystal_SMD_HC49-SD" H 3550 10200 50  0001 C CNN
+F 2 "Crystal:Crystal_HC49-4H_Vertical" H 3550 10200 50  0001 C CNN
 F 3 "" H 3550 10200 50  0001 C CNN
 	1    3550 10200
 	-1   0    0    1   
@@ -1481,15 +1470,15 @@ Text Label 11800 7800 0    60   ~ 0
 USBUART_TX
 Text Label 11800 7900 0    60   ~ 0
 USBUART_RX
-Text Label 9750 3200 0    60   ~ 0
+Text Label 8250 3950 3    60   ~ 0
 SCLK
-Text Label 10600 3050 0    60   ~ 0
+Text Label 7650 3950 3    60   ~ 0
 CPLD_CE_N
-Text Label 8550 3950 3    60   ~ 0
+Text Label 7500 3950 3    60   ~ 0
 CPLD_RST_CAPT
-Text Label 9750 2600 0    60   ~ 0
+Text Label 7800 3950 3    60   ~ 0
 CPLD_INT
-Text Label 9750 2300 0    60   ~ 0
+Text Label 8400 3950 3    60   ~ 0
 MISO
 Text Label 9750 2150 0    60   ~ 0
 CPLD_MRST_N
@@ -1637,10 +1626,6 @@ F 3 "" H 14600 3450 50  0001 C CNN
 	1    14600 3450
 	0    -1   -1   0   
 $EndComp
-Text Label 14450 3750 2    60   ~ 0
-PPS_N
-Text Label 14450 4050 2    60   ~ 0
-CAPTURE_N
 Text Label 14450 4950 2    60   ~ 0
 USBUART_TX
 Text Label 14450 4650 2    60   ~ 0
@@ -2141,24 +2126,24 @@ $EndComp
 $Comp
 L timestamper-rescue:R R19
 U 1 1 5C8A7FA2
-P 10400 2850
-F 0 "R19" V 10480 2850 50  0000 C CNN
-F 1 "R" V 10400 2850 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 10330 2850 50  0001 C CNN
-F 3 "" H 10400 2850 50  0001 C CNN
-	1    10400 2850
-	1    0    0    -1  
+P 7650 5150
+F 0 "R19" V 7730 5150 50  0000 C CNN
+F 1 "R" V 7650 5150 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 7580 5150 50  0001 C CNN
+F 3 "" H 7650 5150 50  0001 C CNN
+	1    7650 5150
+	-1   0    0    1   
 $EndComp
 $Comp
 L power:+3.3V #PWR081
 U 1 1 5C8A8106
-P 10400 2700
-F 0 "#PWR081" H 10400 2550 50  0001 C CNN
-F 1 "+3.3V" H 10400 2840 50  0000 C CNN
-F 2 "" H 10400 2700 50  0001 C CNN
-F 3 "" H 10400 2700 50  0001 C CNN
-	1    10400 2700
-	1    0    0    -1  
+P 7650 5300
+F 0 "#PWR081" H 7650 5150 50  0001 C CNN
+F 1 "+3.3V" H 7650 5440 50  0000 C CNN
+F 2 "" H 7650 5300 50  0001 C CNN
+F 3 "" H 7650 5300 50  0001 C CNN
+	1    7650 5300
+	-1   0    0    1   
 $EndComp
 $Comp
 L timestamper-rescue:C C23
@@ -2190,7 +2175,7 @@ Text Label 13050 8900 0    60   ~ 0
 MOSI
 Text Label 11800 6500 0    60   ~ 0
 MOSI
-Text Label 9750 2000 0    60   ~ 0
+Text Label 8100 3950 3    60   ~ 0
 MOSI
 Text Label 12550 9000 2    60   ~ 0
 CPU_RST_N
@@ -2578,11 +2563,6 @@ Wire Wire Line
 Wire Wire Line
 	13100 8800 13100 8750
 Wire Wire Line
-	10600 3050 10400 3050
-Wire Wire Line
-	10400 3000 10400 3050
-Connection ~ 10400 3050
-Wire Wire Line
 	9700 6800 9700 6850
 Wire Wire Line
 	750  9450 750  9500
@@ -2854,8 +2834,6 @@ Wire Wire Line
 Wire Wire Line
 	4750 10700 4850 10700
 Wire Wire Line
-	10400 3050 9750 3050
-Wire Wire Line
 	750  9500 750  9550
 Wire Wire Line
 	9900 6300 9900 6500
@@ -2916,4 +2894,25 @@ F 3 "http://www2.st.com/resource/en/datasheet/CD00050750.pdf" H 2750 8000 50  00
 	1    2550 7650
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	7650 5000 7650 3950
+$Comp
+L power:+3.3V #PWR0102
+U 1 1 5C936933
+P 750 10350
+F 0 "#PWR0102" H 750 10200 50  0001 C CNN
+F 1 "+3.3V" H 750 10490 50  0000 C CNN
+F 2 "" H 750 10350 50  0001 C CNN
+F 3 "" H 750 10350 50  0001 C CNN
+	1    750  10350
+	1    0    0    -1  
+$EndComp
+Text Label 14450 3750 2    50   ~ 0
+LED_D10
+Text Label 7950 950  1    50   ~ 0
+LED_D10
+Text Label 14450 4050 2    50   ~ 0
+LED_D9
+Text Label 7800 950  1    50   ~ 0
+LED_D9
 $EndSCHEMATC
