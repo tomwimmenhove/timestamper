@@ -39,9 +39,6 @@ entity main is
 		capt_in: in std_logic;
 		rst_capt_in: in std_logic;
 		
-		-- Top bit of the counter
-		div_out: out std_logic;
-			
 		-- serial output
 		sclk_in: in std_logic;
 		ce_n_in: in std_logic;
@@ -51,10 +48,9 @@ entity main is
 		int_out: out std_logic;
 		
 		-- Test outputs
-		--led2_out: out std_logic;
-		led3_out: out std_logic;
-		led4_out: out std_logic;
-		led5_out: out std_logic
+		led_hb: out std_logic; -- Top bit of the counter
+		led_pps: out std_logic;
+		led_capt: out std_logic
 	);
 end main;
 
@@ -75,9 +71,10 @@ begin
 	syncprocess: process(clk_in)
 	begin
 		if falling_edge(clk_in) then
+			-- XXX: Don't forget to invert these for the real PCB. There are inverters at the inputs!
 			pps_in_sync <= pps_in;
 			capt_in_sync <= capt_in;
-			rst_capt_in_sync <= rst_capt_in;
+			rst_capt_in_sync <=rst_capt_in;
 			
 		end if;
 	end process;
@@ -99,12 +96,8 @@ begin
 		int_out => int_out
 	);
 	
-	-- Running, always on
-	--led5_out <= '0';
-	
-	--led2_out <= count(width - 1);
-	led3_out <= not pps_in_sync;
-	led4_out <= not capt_in;
+	led_pps <= not pps_in_sync;
+	led_capt <= not capt_in_sync;
 
 	-- align the counter value
 	capt_count_byte_align <= std_logic_vector(resize(unsigned(capt_count), capt_count_byte_align'length));
@@ -113,7 +106,7 @@ begin
 	with ce_n_in select sdo_out <= spi_sdo when '0', 'Z' when others;
 
 	-- Output the highest bit of the counter
-	div_out <= count(width - 1);
+	led_hb <= count(width - 1);
 
 	-- spi instance
 	i_spi_out: entity work.serial_out

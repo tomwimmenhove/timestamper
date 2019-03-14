@@ -513,7 +513,7 @@ Text Label 3000 1200 0    60   ~ 0
 PPS_N
 Text Label 3000 2000 0    60   ~ 0
 CAPTURE_N
-Text Label 8100 950  1    60   ~ 0
+Text Label 7950 950  1    60   ~ 0
 PPS_N
 $Comp
 L power:GND #PWR018
@@ -581,7 +581,7 @@ F 3 "" H 6750 1850 50  0001 C CNN
 	1    6750 1850
 	0    -1   -1   0   
 $EndComp
-Text Label 6750 3050 2    60   ~ 0
+Text Label 6200 3050 2    60   ~ 0
 MCLK_100MHZ
 Text Label 3450 3400 0    60   ~ 0
 INCLKK_10MHZ
@@ -668,7 +668,7 @@ F 3 "" H 1150 5400 50  0001 C CNN
 	1    1150 5400
 	1    0    0    -1  
 $EndComp
-Text Label 7650 950  1    60   ~ 0
+Text Label 7500 950  1    60   ~ 0
 CAPTURE_N
 Text Label 3350 5750 0    60   ~ 0
 MCLK_100MHZ
@@ -1474,13 +1474,13 @@ Text Label 8250 3950 3    60   ~ 0
 SCLK
 Text Label 7650 3950 3    60   ~ 0
 CPLD_CE_N
-Text Label 7500 3950 3    60   ~ 0
+Text Label 6750 3200 2    60   ~ 0
 CPLD_RST_CAPT
 Text Label 7800 3950 3    60   ~ 0
 CPLD_INT
 Text Label 8400 3950 3    60   ~ 0
 MISO
-Text Label 9750 2150 0    60   ~ 0
+Text Label 8550 3950 3    60   ~ 0
 CPLD_MRST_N
 Text Label 11800 8000 0    60   ~ 0
 CPLD_INT
@@ -2909,10 +2909,12 @@ F 3 "" H 750 10350 50  0001 C CNN
 $EndComp
 Text Label 14450 3750 2    50   ~ 0
 LED_D10
-Text Label 7950 950  1    50   ~ 0
+Text Label 7800 950  1    50   ~ 0
 LED_D10
 Text Label 14450 4050 2    50   ~ 0
 LED_D9
-Text Label 7500 950  1    50   ~ 0
+Text Label 7650 950  1    50   ~ 0
 LED_D9
+Wire Wire Line
+	6200 3050 6750 3050
 $EndSCHEMATC

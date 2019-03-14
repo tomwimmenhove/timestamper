@@ -4,7 +4,8 @@
 #define PIN_INT       2
 #define PIN_CE        3
 #define PIN_RST_CAPT  4
-#define PIN_MRST_N    5
+//#define PIN_MRST_N    5
+#define PIN_MRST_N    A3
 
 #define CDCE925_ADDR  0x64
 

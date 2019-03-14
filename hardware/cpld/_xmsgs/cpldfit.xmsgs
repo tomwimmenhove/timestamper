@@ -8,8 +8,5 @@
 <msg type="warning" file="Cpld" num="0" delta="new" >Unable to retrieve the path to the iSE Project Repository. Will use the default filename of &apos;<arg fmt="%s" index="1">main.ise</arg>&apos;.
 </msg>
 
-<msg type="warning" file="Cpld" num="936" delta="old" >The output buffer &apos;<arg fmt="%s" index="1">led5_out_OBUF</arg>&apos; is missing an input and will be deleted.
-</msg>
-
 </messages>
 
