@@ -1488,7 +1488,7 @@ Text Label 11800 8100 0    60   ~ 0
 CPLD_CE_N
 Text Label 11800 8200 0    60   ~ 0
 CPLD_RST_CAPT
-Text Label 11800 8300 0    60   ~ 0
+Text Label 11800 7350 0    60   ~ 0
 CPLD_MRST_N
 Text Label 11800 6700 0    60   ~ 0
 SCLK

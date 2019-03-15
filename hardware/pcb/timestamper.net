@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/tom/grive-Tom.Wimmenhove/Projects/cosmic/timestamper/hardware/pcb/timestamper.sch)
-    (date "Thu 14 Mar 2019 07:38:03 PM EDT")
+    (date "Thu 14 Mar 2019 08:52:12 PM EDT")
     (tool "Eeschema 5.0.2-bee76a0~70~ubuntu16.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -185,7 +185,7 @@
       (tstamp 5C85A431))
     (comp (ref L1)
       (value L)
-      (footprint Resistors_SMD:R_0603)
+      (footprint Inductor_SMD:L_0603_1608Metric)
       (libsource (lib timestamper-rescue) (part L) (description ""))
       (sheetpath (names /) (tstamps /))
       (tstamp 5C85CE4D))
