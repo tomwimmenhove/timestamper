@@ -1108,7 +1108,7 @@ U 1 1 5C86C792
 P 1550 9650
 F 0 "C7" H 1575 9750 50  0000 L CNN
 F 1 "22u" H 1575 9550 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 1588 9500 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 1588 9500 50  0001 C CNN
 F 3 "" H 1550 9650 50  0001 C CNN
 	1    1550 9650
 	1    0    0    -1  
@@ -1474,7 +1474,7 @@ Text Label 8250 3950 3    60   ~ 0
 SCLK
 Text Label 7650 3950 3    60   ~ 0
 CPLD_CE_N
-Text Label 6750 3200 2    60   ~ 0
+Text Label 6200 3200 2    60   ~ 0
 CPLD_RST_CAPT
 Text Label 7800 3950 3    60   ~ 0
 CPLD_INT
@@ -2908,7 +2908,7 @@ LED_D9
 Text Label 7650 950  1    50   ~ 0
 LED_D9
 Wire Wire Line
-	6200 3050 6750 3050
+	6200 3050 6400 3050
 Connection ~ 6800 6400
 Wire Notes Line
 	11700 500  11700 10100
@@ -3034,4 +3034,33 @@ Wire Wire Line
 	4200 4000 4500 4000
 Text Notes 3800 2550 0    50   ~ 0
 * Schmitt trigger by Nexperia.
+$Comp
+L timestamper-rescue:C C?
+U 1 1 5C8EF151
+P 6400 3500
+F 0 "C?" H 6425 3600 50  0000 L CNN
+F 1 "0" H 6425 3400 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 6438 3350 50  0001 C CNN
+F 3 "" H 6400 3500 50  0001 C CNN
+	1    6400 3500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6200 3200 6750 3200
+Wire Wire Line
+	6400 3350 6400 3050
+Connection ~ 6400 3050
+Wire Wire Line
+	6400 3050 6750 3050
+$Comp
+L power:GND #PWR?
+U 1 1 5C90E89E
+P 6400 3650
+F 0 "#PWR?" H 6400 3400 50  0001 C CNN
+F 1 "GND" H 6400 3500 50  0000 C CNN
+F 2 "" H 6400 3650 50  0001 C CNN
+F 3 "" H 6400 3650 50  0001 C CNN
+	1    6400 3650
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
