@@ -14,9 +14,9 @@ NET "SDO_OUT"				LOC =  "S:PIN7";
 #NET "MRST_N_IN"			LOC =  "S:PIN19";
 NET "MRST_N_IN"			LOC =  "S:PIN8";
 
-NET "led_hb"				LOC =  "S:PIN34";
-NET "led_pps"				LOC =  "S:PIN31";
-NET "led_capt"				LOC =  "S:PIN32";
+NET "led_hb_out"			LOC =  "S:PIN34";
+NET "led_pps_out"			LOC =  "S:PIN31";
+NET "led_capt_out"		LOC =  "S:PIN32";
 
 #PINLOCK_END
 

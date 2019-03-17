@@ -48,9 +48,9 @@ entity main is
 		int_out: out std_logic;
 		
 		-- Test outputs
-		led_hb: out std_logic; -- Top bit of the counter
-		led_pps: out std_logic;
-		led_capt: out std_logic
+		led_hb_out: out std_logic; -- Top bit of the counter
+		led_pps_out: out std_logic;
+		led_capt_out: out std_logic
 	);
 end main;
 
@@ -58,12 +58,10 @@ architecture behavioral of main is
 	signal count: std_logic_vector(width - 1 downto 0);
 	signal capt_count: std_logic_vector(width - 1 downto 0);	-- the counter (capture) latch
 	signal capt_count_byte_align: std_logic_vector((width + (((8 - (width mod 8)) mod 8))) - 1 downto 0);	-- left-justified byte-aligned representation of the counter latch
-	
-	
+
 	signal pps_in_sync: std_logic;
 	signal capt_in_sync: std_logic;
 	signal rst_capt_in_sync: std_logic;
-
 	
 	signal spi_sdo: std_logic;
 begin
@@ -75,7 +73,6 @@ begin
 			pps_in_sync <= pps_in;
 			capt_in_sync <= capt_in;
 			rst_capt_in_sync <=rst_capt_in;
-			
 		end if;
 	end process;
 
@@ -96,17 +93,15 @@ begin
 		int_out => int_out
 	);
 	
-	led_pps <= not pps_in_sync;
-	led_capt <= not capt_in_sync;
+	led_hb_out <= count(width - 1); -- Output the highest bit of the counter
+	led_pps_out <= not pps_in_sync;
+	led_capt_out <= not capt_in_sync;
 
 	-- align the counter value
 	capt_count_byte_align <= std_logic_vector(resize(unsigned(capt_count), capt_count_byte_align'length));
 
 	-- only drive the sdo pin (with spi_sdo) when chip_select is assreted (low)
 	with ce_n_in select sdo_out <= spi_sdo when '0', 'Z' when others;
-
-	-- Output the highest bit of the counter
-	led_hb <= count(width - 1);
 
 	-- spi instance
 	i_spi_out: entity work.serial_out
