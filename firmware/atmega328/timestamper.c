@@ -6,96 +6,96 @@
 
 #include "printf.h"
 #include "i2c_master.h"
+#include "spi.h"
+
+/* Pin definitions */
+#define SCLK_PORT	PORTB
+#define SCLK_DDR	DDRB
+#define SCLK_MASK	_BV(5)
+
+#define SS_PORT	PORTB
+#define SS_DDR	DDRB
+#define SS_MASK	_BV(2)
+
+#define MR_PORT	PORTC
+#define MR_DDR	DDRC
+#define MR_MASK	_BV(3)
+
+#define CS_PORT	PORTD
+#define CS_DDR	DDRD
+#define CS_MASK	_BV(3)
+
+#define RESET_CAPT_PORT	PORTD
+#define RESET_CAPT_DDR	DDRD
+#define RESET_CAPT_MASK	_BV(4)
 
 void setup_hw()
 {
+	/* Setup UART */
 	UCSR0A = 1 << U2X0;
-	uint16_t br = (16000000 / 115200 / 8) - 1;
+	uint16_t br = (F_CPU / 115200 / 8) - 1;
 	UBRR0H = br >> 8;
 	UBRR0L = br;
 
 	printf_init();
-
 	printf("Initializing...");
+
+	/* Initialize I2C */
 	i2c_init();
 
-	// Outputs
-	DDRB |= 1 << 5; // SCLK
-	DDRB |= 1 << 2; // /SS
-	DDRC |= 1 << 3; // Master reset
-	DDRD |= 1 << 3; // CE
-	DDRD |= 1 << 4; // Reset capture
+	/* Configure output pins */
+	SCLK_DDR |= SCLK_MASK;
+	SS_DDR |= SS_MASK;
+	MR_DDR |= MR_MASK;
+	CS_DDR |= CS_MASK;
+	RESET_CAPT_DDR |= RESET_CAPT_MASK;
 
-	PORTB |= 1 << 2; // /SS always high
-
-	// SPI
+	/* Setup SPI */
+	SS_PORT |= SS_MASK; // SS Always high. Low would cause us to go into slave-mode.
 	SPCR |= _BV(MSTR);
 	SPCR |= _BV(SPE);
 
 	// CS high
-	PORTD |= 1 << 3;
+	CS_PORT |= CS_MASK;
 
 	// Reset the CPLD
-	PORTC &= ~(1 << 3);
-	PORTC |= 1 << 3;
+	MR_PORT &= ~MR_MASK;
+	MR_PORT |= MR_MASK;
 
-	MCUCR = 0;  // Trigger INT0 on low level
-	EIMSK = 1;
-
+	/* Do this once to store the PLL values in the CDCE925 EEPROM */
 	//cdce925_init();
-
 	//burn();
 
-	sei(); // Enable interrupts
+	/* Setup interrupts */
+	MCUCR = 0;  // Trigger INT0 on low level
+	EIMSK = 1;
+	sei();		// Enable
+
 	printf("OK\r\n");
 }
 
-
-void i2c_read_test()
-{
-	uint8_t id = read_reg(CDCE925_ADDR, 0x80 | 46);
-	printf("id: 0x%02x\n", id);
-}
-
-#define BUFSIZE 64
+#define BUFSIZE 32
 static volatile uint32_t capture_buffer[BUFSIZE];
 static volatile int8_t head = 0;
 static volatile int8_t tail = -1;
 static volatile int8_t used = 0;
 
-/* Stolen from the Arduino SPI.h header */
-uint8_t spi_inout(uint8_t data)
-{
-	SPDR = data;
-	/*
-	 * The following NOP introduces a small delay that can prevent the wait
-	 * loop form iterating when running at the maximum speed. This gives
-	 * about 10% more speed, even if it seems counter-intuitive. At lower
-	 * speeds it is unnoticed.
-	 */
-	//  asm volatile("nop");
-	while (!(SPSR & _BV(SPIF))) ; // wait
-	return SPDR;
-
-}
-
-//void read_data()
 ISR(INT0_vect)
 {
 	if(used == BUFSIZE)
 		return;
 
 	/* Read the capture register */
-	PORTD &= ~(1 << 3);
+	CS_PORT &= ~CS_MASK;
 	uint8_t a = spi_inout(0x00);
 	uint8_t b = spi_inout(0x00);
 	uint8_t c = spi_inout(0x00);
 	uint8_t d = spi_inout(0x00);
-	PORTD |= 1 << 3;
+	CS_PORT |= CS_MASK;
 
 	/* Re-enable capture */
-	PORTD |= 1 << 4;
-	PORTD &= ~(1 << 4);
+	RESET_CAPT_PORT |= RESET_CAPT_MASK;
+	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
 	if(tail == BUFSIZE - 1)
 		tail = -1;
