@@ -41,7 +41,7 @@ entity capture_counter is
 		
 		count_out: out std_logic_vector(width - 1 downto 0);	-- reg containing the current count
 		capt_count_out: out std_logic_vector(width - 1 downto 0);	-- reg containing the captured count
-		int_out: out std_logic					-- high when new data available in latch
+		int_n_out: out std_logic				-- high when new data available in latch
 	);
 end capture_counter;
 
@@ -87,13 +87,13 @@ begin
 		if mrst_n_in = '0' then
 			wait_reset <= '0';
 			wait_capt_in_low <= capt_in;
-			int_out <= '0';
+			int_n_out <= '1';
 			capt_count_out <= (others => '0');
 		else
 			if rising_edge(clk_in) then
 				if rst_capt_in = '1' then
 					wait_reset <= '0';
-					int_out <= '0';
+					int_n_out <= '1';
 				else
 					if wait_capt_in_low = '1' then
 						if capt_in = '0' then
@@ -104,7 +104,7 @@ begin
 							capt_count_out <= count;
 							wait_reset <= '1';
 							wait_capt_in_low <= '1';
-							int_out <= '1';
+							int_n_out <= '0';
 						end if;
 					end if;
 				end if;

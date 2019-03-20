@@ -45,7 +45,7 @@ entity main is
 		sdo_out: out std_logic;
 		
 		-- high when there's captured data
-		int_out: out std_logic;
+		int_n_out: out std_logic;
 		
 		-- Test outputs
 		led_hb_out: out std_logic; -- Top bit of the counter
@@ -90,7 +90,7 @@ begin
 		rst_capt_in => rst_capt_in_sync,
 		count_out => count,
 		capt_count_out => capt_count,
-		int_out => int_out
+		int_n_out => int_n_out
 	);
 	
 	led_hb_out <= count(width - 1); -- Output the highest bit of the counter
