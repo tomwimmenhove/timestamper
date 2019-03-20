@@ -7,6 +7,7 @@
 #include "printf.h"
 #include "i2c_master.h"
 #include "spi.h"
+#include "circ_buf.h"
 
 /* Pin definitions */
 #define SCLK_PORT	PORTB
@@ -74,15 +75,14 @@ void setup_hw()
 	printf("OK\r\n");
 }
 
-#define BUFSIZE 32
+#define BUFSIZE 32	// Power of two
 static volatile uint32_t capture_buffer[BUFSIZE];
+static volatile int8_t tail = 0;
 static volatile int8_t head = 0;
-static volatile int8_t tail = -1;
-static volatile int8_t used = 0;
 
 ISR(INT0_vect)
 {
-	if(used == BUFSIZE)
+	if(!CIRC_SPACE(head, tail, BUFSIZE))
 		return;
 
 	/* Read the capture register */
@@ -97,11 +97,8 @@ ISR(INT0_vect)
 	RESET_CAPT_PORT |= RESET_CAPT_MASK;
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
-	if(tail == BUFSIZE - 1)
-		tail = -1;
-
-	capture_buffer[++tail] = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
-	used++;
+	capture_buffer[head++] = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
+	head %= BUFSIZE;
 
 	UCSR0B = 1 << 0 | 1 << 1 | 1 << 3 | 1 << 4;
 }
@@ -112,12 +109,10 @@ void main()
 
 	while (1)
 	{
-		while (used)
+		while (CIRC_CNT(head, tail, BUFSIZE))
 		{
-			uint32_t data = capture_buffer[head++];
-			if(head == BUFSIZE)
-				head = 0;
-			used--;
+			uint32_t data = capture_buffer[tail++];
+			tail %= BUFSIZE;
 
 			printf("capture %ld\r\n", data);
 		}
