@@ -3,40 +3,28 @@
 #include <stdio.h>
 #include <util/twi.h>
 #include <string.h>
+#include <util/delay.h>
 
-#include "printf.h"
+#include "ttys.h"
 #include "i2c_master.h"
 #include "spi.h"
 #include "circ_buf.h"
-
-/* Pin definitions */
-#define SCLK_PORT	PORTB
-#define SCLK_DDR	DDRB
-#define SCLK_MASK	_BV(5)
-
-#define SS_PORT	PORTB
-#define SS_DDR	DDRB
-#define SS_MASK	_BV(2)
-
-#define MR_PORT	PORTC
-#define MR_DDR	DDRC
-#define MR_MASK	_BV(3)
-
-#define CS_PORT	PORTD
-#define CS_DDR	DDRD
-#define CS_MASK	_BV(3)
-
-#define RESET_CAPT_PORT	PORTD
-#define RESET_CAPT_DDR	DDRD
-#define RESET_CAPT_MASK	_BV(4)
+#include "pindefs.h"
 
 void setup_hw()
 {
 	/* Setup UART */
-	UCSR0A = 1 << U2X0;
-	uint16_t br = (F_CPU / 115200 / 8) - 1;
-	UBRR0H = br >> 8;
-	UBRR0L = br;
+#define BAUD 57600
+#include <util/setbaud.h>
+	UBRR0H = UBRRH_VALUE;
+	UBRR0L = UBRRL_VALUE;
+	UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
+	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+#if USE_2X
+	UCSR0A |= (1 << U2X0);
+#else
+	UCSR0A &= ~(1 << U2X0);
+#endif
 
 	printf_init();
 	printf("Initializing...");
@@ -63,9 +51,18 @@ void setup_hw()
 	MR_PORT &= ~MR_MASK;
 	MR_PORT |= MR_MASK;
 
+	/* Wait at least a second before we start capturing, in order to make sure 
+	 * we've captured a PPS pulse */
+	for (int i = 0; i < 100; i++)
+		_delay_ms(10);
+
+	/* Re-set capture in case a capture event happened while we were waiting. */
+	RESET_CAPT_PORT |= RESET_CAPT_MASK;
+	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
+
 	/* Do this once to store the PLL values in the CDCE925 EEPROM */
 	//cdce925_init();
-	//burn();
+	//cdce925_burn();
 
 	/* Setup interrupts */
 	MCUCR = 0;  // Trigger INT0 on low level
