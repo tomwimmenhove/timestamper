@@ -15,6 +15,7 @@ void setup_hw()
 {
 	/* Setup UART */
 #define BAUD 57600
+//#define BAUD 38400
 #include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;
 	UBRR0L = UBRRL_VALUE;
@@ -44,10 +45,10 @@ void setup_hw()
 	SPCR |= _BV(MSTR);
 	SPCR |= _BV(SPE);
 
-	// CS high
+	/* CS high */
 	CS_PORT |= CS_MASK;
 
-	// Reset the CPLD
+	/*Reset the CPLD */
 	MR_PORT &= ~MR_MASK;
 	MR_PORT |= MR_MASK;
 
@@ -111,7 +112,7 @@ void main()
 			uint32_t data = capture_buffer[tail++];
 			tail %= BUFSIZE;
 
-			printf("capture %ld\r\n", data);
+			printf("%ld\r\n", data);
 		}
 	}
 }
