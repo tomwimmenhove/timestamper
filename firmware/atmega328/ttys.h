@@ -7,6 +7,15 @@ static inline void uart_putchar(char c)
 	UDR0 = c;
 }
 
+static inline void uart_puts(const char* s)
+{
+	char c;
+	while ((c = *s++))
+	{
+		uart_putchar(c);
+	}
+}
+
 void printf_init();
 
 
