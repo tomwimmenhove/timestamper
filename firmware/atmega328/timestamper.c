@@ -14,7 +14,9 @@
 void setup_hw()
 {
 	/* Setup UART */
-#define BAUD 57600
+//#define BAUD 2000000
+//#define BAUD 57600
+#define BAUD 9600
 //#define BAUD 38400
 #include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;
@@ -28,7 +30,7 @@ void setup_hw()
 #endif
 
 	printf_init();
-	printf("Initializing...");
+//	printf("Initializing...");
 
 	/* Initialize I2C */
 	i2c_init();
@@ -70,7 +72,7 @@ void setup_hw()
 	EIMSK = 1;
 	sei();		// Enable
 
-	printf("OK\r\n");
+//	printf("OK\r\n");
 }
 
 #define BUFSIZE 32	// Power of two
@@ -78,10 +80,24 @@ static volatile uint32_t capture_buffer[BUFSIZE];
 static volatile int8_t tail = 0;
 static volatile int8_t head = 0;
 
+static inline void packet_out(uint32_t x)
+{
+	uart_putchar(x & 0x7f | 0x80);
+	uart_putchar((x >> 7) & 0x7f);
+	uart_putchar((x >> 14) & 0x7f);
+	uart_putchar((x >> 21) & 0x7f);
+}
+
 ISR(INT0_vect)
 {
 	if(!CIRC_SPACE(head, tail, BUFSIZE))
+	{
+		/* Re-enable capture */
+//		RESET_CAPT_PORT |= RESET_CAPT_MASK;
+//		RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
+
 		return;
+	}
 
 	/* Read the capture register */
 	CS_PORT &= ~CS_MASK;
@@ -95,10 +111,11 @@ ISR(INT0_vect)
 	RESET_CAPT_PORT |= RESET_CAPT_MASK;
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
-	capture_buffer[head++] = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
+	capture_buffer[head] = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
+	head++;
 	head %= BUFSIZE;
 
-	UCSR0B = 1 << 0 | 1 << 1 | 1 << 3 | 1 << 4;
+//	packet_out((uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d);
 }
 
 void main()
@@ -109,10 +126,13 @@ void main()
 	{
 		while (CIRC_CNT(head, tail, BUFSIZE))
 		{
-			uint32_t data = capture_buffer[tail++];
-			tail %= BUFSIZE;
+			uint8_t old_tail = tail;
+			tail = (tail + 1) % BUFSIZE;
+			uint32_t data = capture_buffer[old_tail];
+			//tail %= BUFSIZE;
 
-			printf("%ld\r\n", data);
+//			printf("%ld\r\n", data);
+			packet_out(data);
 		}
 	}
 }

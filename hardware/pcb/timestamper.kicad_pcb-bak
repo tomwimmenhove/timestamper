@@ -5254,7 +5254,7 @@
   (gr_text TOP (at 68 55) (layer F.Cu)
     (effects (font (size 1.5 1.5) (thickness 0.3)))
   )
-  (gr_text "Timestamper\n1911 Rev A\n\n" (at 116 132) (layer F.SilkS)
+  (gr_text "Timestamper\n1912 Rev A\n\n" (at 116 132) (layer F.SilkS)
     (effects (font (size 1.5 1.5) (thickness 0.3)))
   )
   (gr_text TomWimmenhove.com (at 68.6 139.6) (layer F.SilkS)

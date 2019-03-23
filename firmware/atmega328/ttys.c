@@ -1,11 +1,6 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
-
-void uart_putchar(char c)
-{
-	loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until data register empty. */
-	UDR0 = c;
-}
+#include "ttys.h"
 
 static int uart_putchar_printf(char c, FILE *stream)
 {
