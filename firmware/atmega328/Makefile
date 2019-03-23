@@ -3,7 +3,7 @@
 TARGET = timestamper
 
 # Programmer serial port
-PROGTTY = /dev/ttyUSB0
+PROGTTY = /dev/ttyCH340USB0
 
 # device parameters
 DEVICE     = atmega328p

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for i in `seq 0 255` ; do
+	DEV="ttyCH340USB$i"
+	if [ ! -e "/dev/$DEV" ]; then
+		echo $DEV
+		exit 0
+	fi
+done
+
+exit 1
+

@@ -1,0 +1,2 @@
+SUBSYSTEMS=="usb", KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", PROGRAM="/usr/sbin/ch340namehelper", SYMLINK+="%c"
+

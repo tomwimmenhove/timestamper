@@ -1,0 +1,2 @@
+A simple udev rule to help with naming of the serial ports.
+Copy 10-ch340.rules to your /etc/udev/rules.d/ directory and ch340namehelper to /usr/sbin/
