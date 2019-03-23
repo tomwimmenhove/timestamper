@@ -48,7 +48,7 @@ end capture_counter;
 architecture behavioral of capture_counter is
 	signal count: std_logic_vector(width - 1 downto 0);
 	signal wait_reset: std_logic;
-	signal wait_capt_in_low: std_logic;
+	signal last_capt_in: std_logic;
 	signal rst_armed: std_logic;
 	
 begin
@@ -81,12 +81,11 @@ begin
 		end if;
 	end process;
 
-	-- NEEDS CLEANUP!
 	captureprocess: process(mrst_n_in, clk_in)
 	begin
 		if mrst_n_in = '0' then
 			wait_reset <= '0';
-			wait_capt_in_low <= capt_in;
+			last_capt_in <= capt_in;
 			int_n_out <= '1';
 			capt_count_out <= (others => '0');
 		else
@@ -95,19 +94,14 @@ begin
 					wait_reset <= '0';
 					int_n_out <= '1';
 				else
-					if wait_capt_in_low = '1' then
-						if capt_in = '0' then
-							wait_capt_in_low <= '0';
-						end if;
-					else
-						if capture_enable_in = '1' and wait_reset = '0' and capt_in = '1' then
-							capt_count_out <= count;
-							wait_reset <= '1';
-							wait_capt_in_low <= '1';
-							int_n_out <= '0';
-						end if;
+					if capture_enable_in = '1' and wait_reset = '0' and capt_in = '1' and last_capt_in = '0' then
+						capt_count_out <= count;
+						wait_reset <= '1';
+						int_n_out <= '0';
 					end if;
 				end if;
+				
+				last_capt_in <= capt_in;
 			end if;
 		end if;
 	end process;

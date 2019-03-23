@@ -68,7 +68,8 @@ begin
 	-- Synchronise inputs
 	syncprocess: process(clk_in)
 	begin
-		if falling_edge(clk_in) then
+		--if falling_edge(clk_in) then
+		if rising_edge(clk_in) then
 			-- XXX: Don't forget to invert these for the real PCB. There are inverters at the inputs!
 			pps_in_sync <= pps_in;
 			capt_in_sync <= capt_in;
