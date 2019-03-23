@@ -11,13 +11,23 @@
 #include "circ_buf.h"
 #include "pindefs.h"
 
+/* For lower baud-rates use a circular buffer to be able
+ * to deal with capture pulses in quick succession.
+ * For high baud rates it's probably more effective to
+ * send the data as it comes in. 
+ * More testing should be done here!
+ */
+#define USE_CIRC_BUF
+
+/* Set the UART's baud-rate for the */
+//#define BAUD 500000
+//#define BAUD 57600
+//#define BAUD 9600
+#define BAUD 38400
+
 void setup_hw()
 {
 	/* Setup UART */
-//#define BAUD 2000000
-//#define BAUD 57600
-#define BAUD 9600
-//#define BAUD 38400
 #include <util/setbaud.h>
 	UBRR0H = UBRRH_VALUE;
 	UBRR0L = UBRRL_VALUE;
@@ -75,10 +85,12 @@ void setup_hw()
 //	printf("OK\r\n");
 }
 
+#ifdef USE_CIRC_BUF
 #define BUFSIZE 32	// Power of two
 static volatile uint32_t capture_buffer[BUFSIZE];
 static volatile int8_t tail = 0;
 static volatile int8_t head = 0;
+#endif
 
 static inline void packet_out(uint32_t x)
 {
@@ -90,14 +102,10 @@ static inline void packet_out(uint32_t x)
 
 ISR(INT0_vect)
 {
+#ifdef USE_CIRC_BUF
 	if(!CIRC_SPACE(head, tail, BUFSIZE))
-	{
-		/* Re-enable capture */
-//		RESET_CAPT_PORT |= RESET_CAPT_MASK;
-//		RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
-
 		return;
-	}
+#endif
 
 	/* Read the capture register */
 	CS_PORT &= ~CS_MASK;
@@ -111,11 +119,16 @@ ISR(INT0_vect)
 	RESET_CAPT_PORT |= RESET_CAPT_MASK;
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
-	capture_buffer[head] = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
+	uint32_t data = (uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d;
+
+#ifdef USE_CIRC_BUF
+	capture_buffer[head] = data;
 	head++;
 	head %= BUFSIZE;
-
-//	packet_out((uint32_t) a << 24 | (uint32_t) b << 16 | (uint32_t) c << 8 | (uint32_t) d);
+#else
+//	printf("%ld\r\n", data);
+	packet_out(data);
+#endif
 }
 
 void main()
@@ -124,16 +137,16 @@ void main()
 
 	while (1)
 	{
+#ifdef USE_CIRC_BUF
 		while (CIRC_CNT(head, tail, BUFSIZE))
 		{
-			uint8_t old_tail = tail;
+			uint32_t data = capture_buffer[tail];
 			tail = (tail + 1) % BUFSIZE;
-			uint32_t data = capture_buffer[old_tail];
-			//tail %= BUFSIZE;
 
 //			printf("%ld\r\n", data);
 			packet_out(data);
 		}
+#endif
 	}
 }
 
