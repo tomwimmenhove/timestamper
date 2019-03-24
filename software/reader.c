@@ -13,10 +13,11 @@
 // Command line options
 int verbose = 0;
 int debug = 0;
+int hide_unreliable = 0;
 char* time_format = "%a, %d %b %Y %T.%N %z";
 
 // Thanks. https://stackoverflow.com/questions/6947413/how-to-open-read-and-write-from-serial-port-in-c
-int set_interface_attribs (int fd, int speed, int parity)
+int set_interface_attribs (int fd, int speed)
 {
 	struct termios tty;
 	memset (&tty, 0, sizeof tty);
@@ -26,27 +27,21 @@ int set_interface_attribs (int fd, int speed, int parity)
 		return -1;
 	}
 
-	cfsetospeed (&tty, speed);
-	cfsetispeed (&tty, speed);
+	cfsetospeed(&tty, speed);
+	cfsetispeed(&tty, speed);
 
-	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-	// disable IGNBRK for mismatched speed tests; otherwise receive break
-	// as \000 chars
-	tty.c_iflag &= ~IGNBRK;         // disable break processing
-	tty.c_lflag = 0;                // no signaling chars, no echo,
-	// no canonical processing
-	tty.c_oflag = 0;                // no remapping, no delays
-	tty.c_cc[VMIN]  = 0;            // read doesn't block
-	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-	tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-
-	tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
-	// enable reading
-	tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
-	tty.c_cflag |= parity;
+	tty.c_cflag |= (CLOCAL | CREAD);
+	tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+	tty.c_cflag &= ~PARENB;
 	tty.c_cflag &= ~CSTOPB;
+	tty.c_cflag &= ~CSIZE;
+	tty.c_cflag |= CS8;
+	//tty.c_cflag &= ~CNEW_RTSCTS;
 	tty.c_cflag &= ~CRTSCTS;
+	tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+	tty.c_oflag &= ~OPOST;
+	tty.c_cc[VMIN]  = 1;
+	tty.c_cc[VTIME] = 0;
 
 	if (tcsetattr (fd, TCSANOW, &tty) != 0)
 	{
@@ -121,15 +116,23 @@ void handle_event(uint32_t frac)
 	/* Get the error */
 	int64_t err = local - ts;
 
+	int unreliable = err > 10000000 || err < -10000000;
+	if (unreliable && hide_unreliable)
+		return;
+
 	if (verbose > 1) printf("\nLocal     : %ss\n", fp_str(local));
 	if (verbose > 2) printf("Timestamp : %ss\n", fp_str(ts));
 
 	if (debug)
 	{
-		system("date \"+%a, %d %b %Y %T.%N %z SYSTEM DATETIME\"");
+		if (system("date \"+%a, %d %b %Y %T.%N %z SYSTEM DATETIME\"") == -1)
+		{
+			perror("system()");
+			exit(1);
+		}
 	}
 
-	if (err > 10000000 || err < -10000000)
+	if (unreliable)
 		printf("*"); // Let the user know this is an untrustworthy measurement (> 100ms discrepancy)
 	print_time(top_s, frac, time_format);
 
@@ -151,6 +154,7 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--debug,   -d : Debug (Print system date on each event)\n");
 	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
+	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))");
 	fprintf(stderr, "\t--help,    -h : This\n");
 }
 
@@ -164,13 +168,14 @@ int main(int argc, char** argv)
 			{"verbose", no_argument,       0, 'v'},
 			{"debug",   no_argument,       0, 'd'},
 			{"format",  required_argument, 0, 'f'},
+			{"hide",    no_argument,       0, 'r'},
 			{"help",    no_argument,       0, 'h'},
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vdf:",
+		c = getopt_long (argc, argv, "vdf:hr",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -190,6 +195,9 @@ int main(int argc, char** argv)
 				return 0;
 			case 'f':
 				time_format = optarg;
+				break;
+			case 'r':
+				hide_unreliable = 1;
 				break;
 
 			default:
@@ -218,7 +226,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (set_interface_attribs(serfd, B38400, 0) == -1)
+	if (set_interface_attribs(serfd, B38400) == -1)
 		return 1;
 
 	tcflush(serfd,TCIOFLUSH);
@@ -227,13 +235,8 @@ int main(int argc, char** argv)
 	uint8_t packet[4];
 	int pos = 0;
 	int n;
-	while ((n = read(serfd, buf, sizeof(buf))) != -1)
+	while ((n = read(serfd, buf, sizeof(buf))) > 0)
 	{
-		if (!n)
-			continue;
-
-//		printf("n: %d\n", n);
-
 		for (int i = 0; i < n; i++)
 		{
 			uint8_t b = buf[i];
@@ -263,5 +266,5 @@ int main(int argc, char** argv)
 		}
 	}
 
-	return 0;
+	return n == 0 ? 0 : 1;
 }
