@@ -88,11 +88,7 @@ void print_time(int64_t top, uint32_t frac, const char* format)
 	if (nsp)
 	{   
 		char* right = nsp + 2;
-		printf("%08d%s\n", frac, right);
-	}
-	else
-	{
-		printf("\n");
+		printf("%08d%s", frac, right);
 	}
 }
 
@@ -125,8 +121,7 @@ void handle_event(uint32_t frac)
 	/* Get the error */
 	int64_t err = local - ts;
 
-	if (verbose > 0) printf("\nError     : %ss\n", fp_str(err));
-	if (verbose > 1) printf("Local     : %ss\n", fp_str(local));
+	if (verbose > 1) printf("\nLocal     : %ss\n", fp_str(local));
 	if (verbose > 2) printf("Timestamp : %ss\n", fp_str(ts));
 
 	if (debug)
@@ -138,6 +133,9 @@ void handle_event(uint32_t frac)
 		printf("*"); // Let the user know this is an untrustworthy measurement (> 100ms discrepancy)
 	print_time(top_s, frac, time_format);
 
+	if (verbose > 0) printf(" -- Error: %ss", fp_str(err));
+
+	putchar('\n');
 	fflush(stdout);
 }
 
