@@ -1,10 +1,19 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h> 
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+#include <getopt.h>
+
+// Command line options
+int verbose = 0;
+int debug = 0;
+char* time_format = "%a, %d %b %Y %T.%N %z";
 
 // Thanks. https://stackoverflow.com/questions/6947413/how-to-open-read-and-write-from-serial-port-in-c
 int set_interface_attribs (int fd, int speed, int parity)
@@ -47,22 +56,145 @@ int set_interface_attribs (int fd, int speed, int parity)
 	return 0;
 }
 
+uint64_t GetUtcMicros()
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+
+	return (unsigned long long)(tv.tv_sec) * 1000000 + (unsigned long long)(tv.tv_usec);
+}
+
+#define HZ 100000000 /* XXX: This is a macro for convenience. It won't work with different values, though! */
+
+void print_time(int64_t top, uint32_t frac, const char* format)
+{
+	time_t now_s = top;
+	struct tm *now_tm;
+	char s[256];
+
+	now_tm = localtime(&now_s);
+	if (strftime(s, sizeof(s) - 1, format, now_tm) <= 0)
+	{   
+		fprintf(stderr, "strftime() failed.\n");
+		exit(1);
+	}
+
+	char* nsp = strstr(s, "%N");
+	if (nsp)
+	{   
+		*nsp = 0;
+	}
+	printf("%s", s);
+	if (nsp)
+	{   
+		char* right = nsp + 2;
+		printf("%08d%s\n", frac, right);
+	}
+	else
+	{
+		printf("\n");
+	}
+}
+
+void handle_event(uint32_t frac)
+{
+	/* Get the local time in 'steps' of 1/HZ */
+	int64_t local = GetUtcMicros() * (HZ / 1000000);
+
+	/* Get the top of the second */
+	int64_t top_s = (local - frac + (HZ / 2)) / HZ;
+
+	/* Get the actual timestamp in 'steps' of 1/HZ */
+	int64_t ts = top_s * HZ + frac;
+
+	/* Get the error */
+	int64_t err = local - ts;
+
+	if (verbose)
+	{
+		printf("\nLocal     : %.8fs\n", (double) local / 100000000.0f);
+		printf("Timestamp : %.8fs\n", ((double) ts) / 100000000.0f);
+		printf("Error     : %.8fs\n", (double) (err) / 100000000.0f);
+	}
+
+	if (debug)
+	{
+		system("date \"+%a, %d %b %Y %T.%N %z SYSTEM DATETIME\"");
+	}
+
+	if (err > 10000000 || err < -10000000)
+		printf("*"); // Let the user know this is an untrustworthy measurement (> 100ms discrepancy)
+	print_time(top_s, frac, time_format);
+
+	fflush(stdout);
+}
+
 static inline uint32_t unpack(uint8_t* out)
 {
 	return (out[0] & 0x7f) | (out[1] << 7) | (out[2] << 14) | (out[3] << 21);
 }
 
+void print_usage(char* name)
+{
+	fprintf(stderr, "Usage: %s [options] <serial port>\n", name);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "\t--verbose, -v : Verbose output\n");
+	fprintf(stderr, "\t--debug,   -d : Debug (Print system date on each event)\n");
+	fprintf(stderr, "\t--format,  -f : Specify the time format (default: %s)\n", time_format);
+	fprintf(stderr, "\t--help,    -h : This\n");
+}
 
 int main(int argc, char** argv)
 {
-	if (argc != 2)
+	int c;
+	while (1)
 	{
-		fprintf(stderr, "Usage: %s <serial point>\n", argv[0]);
+		static struct option long_options[] =
+		{
+			{"verbose", no_argument,       0, 'v'},
+			{"debug",   no_argument,       0, 'd'},
+			{"format",  required_argument, 0, 'f'},
+			{"help",    no_argument,       0, 'h'},
+			{0, 0, 0, 0}
+		};
+		/* getopt_long stores the option index here. */
+		int option_index = 0;
 
+		c = getopt_long (argc, argv, "vdf:",
+				long_options, &option_index);
+
+		/* Detect the end of the options. */
+		if (c == -1)
+			break;
+
+		switch (c)
+		{
+			case 'v':
+				verbose = 1;
+				break;
+			case 'd':
+				debug = 1;
+				break;
+			case 'h':
+				print_usage(argv[0]);
+				return 0;
+			case 'f':
+				time_format = optarg;
+				break;
+
+			default:
+				print_usage(argv[0]);
+				return 1;
+		}
+	}
+
+	if (argc != optind + 1)
+	{
+		print_usage(argv[0]);
 		return 1;
 	}
 
-	char* serial = argv[1];
+	char* serial = argv[optind];
 
 	int serfd = open(serial, O_RDWR);
 	if (serfd == -1)
@@ -109,7 +241,7 @@ int main(int argc, char** argv)
 			if (pos == 4)
 			{
 				uint32_t x = unpack(packet);
-				printf("%d\n", x);
+				handle_event(x);
 			}
 			if (pos > 4)
 			{

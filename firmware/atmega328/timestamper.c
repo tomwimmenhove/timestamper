@@ -20,6 +20,9 @@
 #define USE_CIRC_BUF
 
 /* Set the UART's baud-rate for the */
+/* XXX: Apparently the CH340G's error rate if fucking _horrid_
+ * at high bit-rates. 38400 seems to be the only safe limit that
+ * we can use on an 8MHz controller :( */
 //#define BAUD 500000
 //#define BAUD 57600
 //#define BAUD 9600
