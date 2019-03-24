@@ -96,12 +96,27 @@ void print_time(int64_t top, uint32_t frac, const char* format)
 	}
 }
 
+char* fp_str(int64_t x)
+{
+	static char s[32];
+
+	if (x < 0)
+	{
+		x = -x;
+		printf("-");
+	}
+
+	snprintf(s, sizeof(s), "%ld.%08ld", x / HZ, x % HZ);
+
+	return s;
+}
+
 void handle_event(uint32_t frac)
 {
 	/* Get the local time in 'steps' of 1/HZ */
 	int64_t local = GetUtcMicros() * (HZ / 1000000);
 
-	/* Get the top of the second */
+	/* Round to the nearest second */
 	int64_t top_s = (local - frac + (HZ / 2)) / HZ;
 
 	/* Get the actual timestamp in 'steps' of 1/HZ */
@@ -110,12 +125,9 @@ void handle_event(uint32_t frac)
 	/* Get the error */
 	int64_t err = local - ts;
 
-	if (verbose)
-	{
-		printf("\nLocal     : %.8fs\n", (double) local / 100000000.0f);
-		printf("Timestamp : %.8fs\n", ((double) ts) / 100000000.0f);
-		printf("Error     : %.8fs\n", (double) (err) / 100000000.0f);
-	}
+	if (verbose > 0) printf("\nError     : %ss\n", fp_str(err));
+	if (verbose > 1) printf("Local     : %ss\n", fp_str(local));
+	if (verbose > 2) printf("Timestamp : %ss\n", fp_str(ts));
 
 	if (debug)
 	{
@@ -138,9 +150,9 @@ void print_usage(char* name)
 {
 	fprintf(stderr, "Usage: %s [options] <serial port>\n", name);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "\t--verbose, -v : Verbose output\n");
+	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--debug,   -d : Debug (Print system date on each event)\n");
-	fprintf(stderr, "\t--format,  -f : Specify the time format (default: %s)\n", time_format);
+	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
 	fprintf(stderr, "\t--help,    -h : This\n");
 }
 
@@ -170,7 +182,7 @@ int main(int argc, char** argv)
 		switch (c)
 		{
 			case 'v':
-				verbose = 1;
+				verbose++;
 				break;
 			case 'd':
 				debug = 1;
@@ -210,6 +222,8 @@ int main(int argc, char** argv)
 
 	if (set_interface_attribs(serfd, B38400, 0) == -1)
 		return 1;
+
+	tcflush(serfd,TCIOFLUSH);
 
 	uint8_t buf[4096];
 	uint8_t packet[4];
