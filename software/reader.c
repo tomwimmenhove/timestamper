@@ -241,7 +241,7 @@ int main(int argc, char** argv)
 			if (pos == 4)
 			{
 				uint32_t x = unpack(packet);
-				handle_event(x);
+				handle_event(x % HZ);
 			}
 			if (pos > 4)
 			{
