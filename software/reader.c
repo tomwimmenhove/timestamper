@@ -60,6 +60,7 @@ uint64_t GetUtcMicros()
 }
 
 #define HZ 100000000 /* XXX: This is a macro for convenience. It won't work with different values, though! */
+#define HZ_TOL 10 /* Warn when a capture with a value higher than HZ + HZ_TOL is received. */
 
 void print_time(int64_t top, uint32_t frac, const char* format)
 {
@@ -104,6 +105,15 @@ char* fp_str(int64_t x)
 
 void handle_event(uint32_t frac)
 {
+	int out_of_tol = frac > HZ + HZ_TOL;
+
+	if (out_of_tol && verbose)
+	{
+		fprintf(stderr, "WARNING: read a capture count of %u, which is out of tolerance! (%u is the maximum bound)\n", frac, HZ + HZ_TOL);
+	}
+
+	frac %= HZ;
+
 	/* Get the local time in 'steps' of 1/HZ */
 	int64_t local = GetUtcMicros() * (HZ / 1000000);
 
@@ -116,7 +126,7 @@ void handle_event(uint32_t frac)
 	/* Get the error */
 	int64_t err = local - ts;
 
-	int unreliable = err > 10000000 || err < -10000000;
+	int unreliable = err > 10000000 || err < -10000000 || out_of_tol;
 	if (unreliable && hide_unreliable)
 		return;
 
@@ -256,7 +266,8 @@ int main(int argc, char** argv)
 			if (pos == 4)
 			{
 				uint32_t x = unpack(packet);
-				handle_event(x % HZ);
+
+				handle_event(x);
 			}
 			if (pos > 4)
 			{
