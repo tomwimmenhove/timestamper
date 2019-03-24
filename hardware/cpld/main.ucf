@@ -11,7 +11,6 @@ NET "CE_N_IN"				LOC =  "S:PIN2";
 NET "RST_CAPT_IN"			LOC =  "S:PIN44";
 NET "INT_N_OUT"			LOC =  "S:PIN3";
 NET "SDO_OUT"				LOC =  "S:PIN7";
-#NET "MRST_N_IN"			LOC =  "S:PIN19";
 NET "MRST_N_IN"			LOC =  "S:PIN8";
 
 NET "led_hb_out"			LOC =  "S:PIN34";

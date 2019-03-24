@@ -126,8 +126,7 @@ ISR(INT0_vect)
 
 #ifdef USE_CIRC_BUF
 	capture_buffer[head] = data;
-	head++;
-	head %= BUFSIZE;
+	head = (head + 1) % BUFSIZE;
 #else
 //	printf("%ld\r\n", data);
 	packet_out(data);
