@@ -4,52 +4,19 @@
 #include <errno.h>
 #include <fcntl.h> 
 #include <string.h>
-#include <termios.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
 #include <getopt.h>
+#include <termios.h>
+
+#include "serial.h"
 
 // Command line options
 int verbose = 0;
 int debug = 0;
 int hide_unreliable = 0;
 char* time_format = "%a, %d %b %Y %T.%N %z";
-
-// Thanks. https://stackoverflow.com/questions/6947413/how-to-open-read-and-write-from-serial-port-in-c
-int set_interface_attribs (int fd, int speed)
-{
-	struct termios tty;
-	memset (&tty, 0, sizeof tty);
-	if (tcgetattr (fd, &tty) != 0)
-	{
-		fprintf(stderr, "error %d from tcgetattr", errno);
-		return -1;
-	}
-
-	cfsetospeed(&tty, speed);
-	cfsetispeed(&tty, speed);
-
-	tty.c_cflag |= (CLOCAL | CREAD);
-	tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-	tty.c_cflag &= ~PARENB;
-	tty.c_cflag &= ~CSTOPB;
-	tty.c_cflag &= ~CSIZE;
-	tty.c_cflag |= CS8;
-	//tty.c_cflag &= ~CNEW_RTSCTS;
-	tty.c_cflag &= ~CRTSCTS;
-	tty.c_iflag &= ~(IXON | IXOFF | IXANY);
-	tty.c_oflag &= ~OPOST;
-	tty.c_cc[VMIN]  = 1;
-	tty.c_cc[VTIME] = 0;
-
-	if (tcsetattr (fd, TCSANOW, &tty) != 0)
-	{
-		fprintf(stderr, "error %d from tcsetattr", errno);
-		return -1;
-	}
-	return 0;
-}
 
 uint64_t GetUtcMicros()
 {
@@ -236,7 +203,8 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (set_interface_attribs(serfd, B38400) == -1)
+	//if (set_interface_attribs(serfd, B38400) == -1)
+	if (set_interface_attribs(serfd, 76800) == -1)
 		return 1;
 
 	tcflush(serfd,TCIOFLUSH);

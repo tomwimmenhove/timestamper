@@ -26,7 +26,8 @@
 //#define BAUD 500000
 //#define BAUD 57600
 //#define BAUD 9600
-#define BAUD 38400
+//#define BAUD 38400
+#define BAUD 76800
 
 void setup_hw()
 {
