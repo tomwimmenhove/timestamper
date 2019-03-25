@@ -164,7 +164,7 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--debug,   -d : Debug (Print system date on each event)\n");
 	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
-	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))");
+	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
 	fprintf(stderr, "\t--help,    -h : This\n");
 }
 
