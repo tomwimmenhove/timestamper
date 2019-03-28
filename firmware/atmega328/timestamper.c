@@ -10,6 +10,7 @@
 #include "spi.h"
 #include "circ_buf.h"
 #include "pindefs.h"
+#include "cdce925.h"
 
 /* For lower baud-rates use a circular buffer to be able
  * to deal with capture pulses in quick succession.
@@ -78,8 +79,8 @@ void setup_hw()
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
 	/* Do this once to store the PLL values in the CDCE925 EEPROM */
-	//cdce925_init();
-	//cdce925_burn();
+//	cdce925_init();
+//	cdce925_burn();
 
 	/* Setup interrupts */
 	MCUCR = 0;  // Trigger INT0 on low level
@@ -129,7 +130,6 @@ ISR(INT0_vect)
 	capture_buffer[head] = data;
 	head = (head + 1) % BUFSIZE;
 #else
-//	printf("%ld\r\n", data);
 	packet_out(data);
 #endif
 }
