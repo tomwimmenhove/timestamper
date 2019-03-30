@@ -1,23 +1,22 @@
 ----------------------------------------------------------------------------------
--- company: 
--- engineer: Tom Wimmenhove
--- 
--- create date:    19:00:21 02/26/2019 
--- design name:    timestamp capture counter
--- module name:    capture_counter - behavioral 
--- project name: 
--- target devices: 
--- tool versions: 
--- description: captures the time of capture pulses
--- 
 --
--- dependencies: 
+-- This file is part of the TimeStamper distribution (https://github.com/tomwimmenhove/timestamper)
+-- Copyright (c) 2019 Tom wimmenhove
+-- 
+-- This program is free software: you can redistribute it and/or modify  
+-- it under the terms of the GNU General Public License as published by  
+-- the Free Software Foundation, version 3.
 --
--- revision: 
--- revision 0.01 - file created
--- additional comments: 
+-- This program is distributed in the hope that it will be useful, but 
+-- WITHOUT ANY WARRANTY; without even the implied warranty of 
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+-- General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License 
+-- along with this program. If not, see <http://www.gnu.org/licenses/>.
 --
 ----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;

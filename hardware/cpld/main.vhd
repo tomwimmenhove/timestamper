@@ -1,22 +1,22 @@
 ----------------------------------------------------------------------------------
--- company: 
--- engineer: Tom Wimmenhove
+--
+-- This file is part of the TimeStamper distribution (https://github.com/tomwimmenhove/timestamper)
+-- Copyright (c) 2019 Tom wimmenhove
 -- 
--- create date:    14:48:25 02/24/2019 
--- design name: 
--- module name:    main - behavioral 
--- project name: 
--- target devices: 
--- tool versions: 
--- description: 
+-- This program is free software: you can redistribute it and/or modify  
+-- it under the terms of the GNU General Public License as published by  
+-- the Free Software Foundation, version 3.
 --
--- dependencies: 
+-- This program is distributed in the hope that it will be useful, but 
+-- WITHOUT ANY WARRANTY; without even the implied warranty of 
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+-- General Public License for more details.
 --
--- revision: 
--- revision 0.01 - file created
--- additional comments: 
+-- You should have received a copy of the GNU General Public License 
+-- along with this program. If not, see <http://www.gnu.org/licenses/>.
 --
 ----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
