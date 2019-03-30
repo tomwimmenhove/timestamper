@@ -1,4 +1,4 @@
-// https://github.com/g4lvanix/I2C-master-lib
+// This file is largely based on https://github.com/g4lvanix/I2C-master-lib
 
 #include <avr/io.h>
 #include <util/twi.h>

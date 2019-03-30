@@ -1,3 +1,20 @@
+/* 
+ * This file is part of the TimeStamper distribution (https://github.com/tomwimmenhove/timestamper)
+ * Copyright (c) 2019 Tom wimmenhove
+ * 
+ * This program is free software: you can redistribute it and/or modify  
+ * it under the terms of the GNU General Public License as published by  
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,9 +29,12 @@
 
 #include "serial.h"
 
+#define VERSION_MAJOR	0
+#define VERSION_MINOR	1
+#define VERSION_MICRO	0
+
 // Command line options
 int verbose = 0;
-int debug = 0;
 int hide_unreliable = 0;
 char* time_format = "%a, %d %b %Y %T.%N %z";
 
@@ -100,15 +120,6 @@ void handle_event(uint32_t frac)
 	if (verbose > 1) printf("\nLocal     : %ss\n", fp_str(local));
 	if (verbose > 2) printf("Timestamp : %ss\n", fp_str(ts));
 
-	if (debug)
-	{
-		if (system("date \"+%a, %d %b %Y %T.%N %z SYSTEM DATETIME\"") == -1)
-		{
-			perror("system()");
-			exit(1);
-		}
-	}
-
 	if (unreliable)
 		printf("*"); // Let the user know this is an untrustworthy measurement (> 100ms discrepancy)
 	print_time(top_s, frac, time_format);
@@ -128,11 +139,16 @@ void print_usage(char* name)
 {
 	fprintf(stderr, "Usage: %s [options] <serial port>\n", name);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
-	fprintf(stderr, "\t--debug,   -d : Debug (Print system date on each event)\n");
 	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
-	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
 	fprintf(stderr, "\t--help,    -h : This\n");
+	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
+	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
+	fprintf(stderr, "\t--version, -V : Show version information\n");
+}
+
+void print_version()
+{
+	printf("Timestamper version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
 }
 
 int main(int argc, char** argv)
@@ -142,17 +158,17 @@ int main(int argc, char** argv)
 	{
 		static struct option long_options[] =
 		{
-			{"verbose", no_argument,       0, 'v'},
-			{"debug",   no_argument,       0, 'd'},
 			{"format",  required_argument, 0, 'f'},
-			{"hide",    no_argument,       0, 'r'},
 			{"help",    no_argument,       0, 'h'},
+			{"hide",    no_argument,       0, 'r'},
+			{"verbose", no_argument,       0, 'v'},
+			{"version", no_argument,       0, 'V' },
 			{0, 0, 0, 0}
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vdf:hr",
+		c = getopt_long (argc, argv, "vf:hr",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -161,21 +177,21 @@ int main(int argc, char** argv)
 
 		switch (c)
 		{
-			case 'v':
-				verbose++;
-				break;
-			case 'd':
-				debug = 1;
+			case 'f':
+				time_format = optarg;
 				break;
 			case 'h':
 				print_usage(argv[0]);
 				return 0;
-			case 'f':
-				time_format = optarg;
-				break;
 			case 'r':
 				hide_unreliable = 1;
 				break;
+			case 'v':
+				verbose++;
+				break;
+			case 'V':
+				print_version();
+				return 0;
 
 			default:
 				print_usage(argv[0]);
