@@ -37,6 +37,10 @@
  */
 #define USE_CIRC_BUF
 
+#ifdef USE_CIRC_BUF
+#define BUFSIZE 32 // Power of two
+#endif
+
 /* Set the UART's baud-rate for the */
 /* XXX: Apparently the CH340G's error rate if fucking _horrid_
  * at high bit-rates. 38400 seems to be the only safe limit that
@@ -96,7 +100,7 @@ void setup_hw()
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
 	/* Do this once to store the PLL values in the CDCE925 EEPROM */
-	cdce925_init();
+//	cdce925_init();
 //	cdce925_burn();
 
 	/* Setup interrupts */
@@ -108,7 +112,6 @@ void setup_hw()
 }
 
 #ifdef USE_CIRC_BUF
-#define BUFSIZE 32	// Power of two
 static volatile uint32_t capture_buffer[BUFSIZE];
 static volatile int8_t tail = 0;
 static volatile int8_t head = 0;
@@ -126,7 +129,10 @@ ISR(INT0_vect)
 {
 #ifdef USE_CIRC_BUF
 	if(!CIRC_SPACE(head, tail, BUFSIZE))
+	{
+		EIMSK = 0;  // Waaaait for it...
 		return;
+	}
 #endif
 
 	/* Read the capture register */
@@ -165,6 +171,8 @@ void main()
 
 //			printf("%ld\r\n", data);
 			packet_out(data);
+
+			EIMSK = 1; // re-enable interrupts (in case they were disabled, in the event of a full buffer)
 		}
 #endif
 	}
