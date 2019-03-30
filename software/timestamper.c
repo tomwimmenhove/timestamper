@@ -33,9 +33,15 @@
 #define VERSION_MINOR	1
 #define VERSION_MICRO	0
 
+#define PLL_HZ 100000000
+#define NS_TOL 100 /* Warn when a capture with a value higher than NS + NS_TOL is received. */
+
+#define NS 1000000000
+
 // Command line options
 int verbose = 0;
 int hide_unreliable = 0;
+int prec = 9;
 char* time_format = "%a, %d %b %Y %T.%N %z";
 
 uint64_t GetUtcMicros()
@@ -45,9 +51,6 @@ uint64_t GetUtcMicros()
 
 	return (unsigned long long)(tv.tv_sec) * 1000000 + (unsigned long long)(tv.tv_usec);
 }
-
-#define HZ 100000000 /* XXX: This is a macro for convenience. It won't work with different values, though! */
-#define HZ_TOL 10 /* Warn when a capture with a value higher than HZ + HZ_TOL is received. */
 
 void print_time(int64_t top, uint32_t frac, const char* format)
 {
@@ -71,7 +74,12 @@ void print_time(int64_t top, uint32_t frac, const char* format)
 	if (nsp)
 	{   
 		char* right = nsp + 2;
-		printf("%08d%s", frac, right);
+
+		char s1[16];
+		snprintf(s1, sizeof(s1), "%09d", frac);
+		s1[prec] = 0; // truncate string
+
+		printf("%s%s", s1, right);
 	}
 }
 
@@ -85,30 +93,30 @@ char* fp_str(int64_t x)
 		printf("-");
 	}
 
-	snprintf(s, sizeof(s), "%ld.%08ld", x / HZ, x % HZ);
+	snprintf(s, sizeof(s), "%ld.%09ld", x / NS, x % NS);
 
 	return s;
 }
 
-void handle_event(uint32_t frac)
+void handle_frac(uint32_t frac)
 {
-	int out_of_tol = frac > HZ + HZ_TOL;
+	int out_of_tol = frac > NS + NS_TOL;
 
 	if (out_of_tol && verbose)
 	{
-		fprintf(stderr, "WARNING: read a capture count of %u, which is out of tolerance! (%u is the maximum bound)\n", frac, HZ + HZ_TOL);
+		fprintf(stderr, "WARNING: read a capture count of %u, which is out of tolerance! (%u is the maximum bound)\n", frac, NS + NS_TOL);
 	}
 
-	frac %= HZ;
+	frac %= NS;
 
-	/* Get the local time in 'steps' of 1/HZ */
-	int64_t local = GetUtcMicros() * (HZ / 1000000);
+	/* Get the local time in 'steps' of 1/NS */
+	int64_t local = GetUtcMicros() * (NS / 1000000);
 
 	/* Round to the nearest second */
-	int64_t top_s = (local - frac + (HZ / 2)) / HZ;
+	int64_t top_s = (local - frac + (NS / 2)) / NS;
 
-	/* Get the actual timestamp in 'steps' of 1/HZ */
-	int64_t ts = top_s * HZ + frac;
+	/* Get the actual timestamp in 'steps' of 1/NS */
+	int64_t ts = top_s * NS + frac;
 
 	/* Get the error */
 	int64_t err = local - ts;
@@ -130,6 +138,12 @@ void handle_event(uint32_t frac)
 	fflush(stdout);
 }
 
+void handle_event(uint32_t x)
+{
+	/* Fixed point from counter value to nanoseconds */
+	handle_frac((uint32_t) ((uint64_t) x * NS / PLL_HZ));
+}
+
 static inline uint32_t unpack(uint8_t* out)
 {
 	return (out[0] & 0x7f) | (out[1] << 7) | (out[2] << 14) | (out[3] << 21);
@@ -142,6 +156,7 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
 	fprintf(stderr, "\t--help,    -h : This\n");
 	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
+	fprintf(stderr, "\t--prec,    -p : Set the number of digits after the decimal point (0..9)\n");
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--version, -V : Show version information\n");
 }
@@ -161,6 +176,7 @@ int main(int argc, char** argv)
 			{"format",  required_argument, 0, 'f'},
 			{"help",    no_argument,       0, 'h'},
 			{"hide",    no_argument,       0, 'r'},
+			{"prec",    required_argument, 0, 'p'},
 			{"verbose", no_argument,       0, 'v'},
 			{"version", no_argument,       0, 'V' },
 			{0, 0, 0, 0}
@@ -168,7 +184,7 @@ int main(int argc, char** argv)
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vf:hr",
+		c = getopt_long (argc, argv, "vf:hrp:",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -185,6 +201,15 @@ int main(int argc, char** argv)
 				return 0;
 			case 'r':
 				hide_unreliable = 1;
+				break;
+			case 'p':
+				prec = atoi(optarg);
+				if (prec < 0 || prec > 9)
+				{
+					print_usage(argv[0]);
+					return 1;
+				}
+
 				break;
 			case 'v':
 				verbose++;
