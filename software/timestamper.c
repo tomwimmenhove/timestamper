@@ -121,7 +121,7 @@ void handle_frac(uint32_t frac)
 	/* Get the error */
 	int64_t err = local - ts;
 
-	int unreliable = err > 10000000 || err < -10000000 || out_of_tol;
+	int unreliable = err > 100000000 || err < -100000000 || out_of_tol;
 	if (unreliable && hide_unreliable)
 		return;
 
