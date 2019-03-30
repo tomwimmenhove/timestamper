@@ -26,13 +26,16 @@ SOURCES = $(wildcard *.c)
 OBJECTS = $(patsubst %.c, %.o, $(SOURCES))
 
 # get file dependencies then build hex
-all: Makefile.deps $(TARGET).hex
+all: Makefile.deps cdce925_regs.h $(TARGET).hex
 
 # include object dependencies
 -include Makefile.deps
 
 $(TARGET).elf: $(OBJECTS)
 	$(CC) -mmcu=$(DEVICE) -o $@ $^
+
+cdce925_regs.h: ti_clk.TXT
+	./makecdce925_regs_h.sh < ti_clk.TXT > cdce925_regs.h
 
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) -O ihex $< $@
@@ -43,7 +46,7 @@ Makefile.deps: $(SOURCES)
 
 # remove build files
 clean:
-	@rm -f *.o $(TARGET).elf $(TARGET).hex Makefile.deps
+	@rm -f *.o $(TARGET).elf $(TARGET).hex Makefile.deps cdce925_regs.h
 
 # flash to micro-controller
 flash: $(TARGET).hex

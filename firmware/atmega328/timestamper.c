@@ -96,7 +96,7 @@ void setup_hw()
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
 	/* Do this once to store the PLL values in the CDCE925 EEPROM */
-//	cdce925_init();
+	cdce925_init();
 //	cdce925_burn();
 
 	/* Setup interrupts */
