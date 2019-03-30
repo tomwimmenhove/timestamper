@@ -31,7 +31,7 @@
 
 #define VERSION_MAJOR	0
 #define VERSION_MINOR	1
-#define VERSION_MICRO	0
+#define VERSION_MICRO	1
 
 #define PLL_HZ 100000000
 #define NS_TOL 100 /* Warn when a capture with a value higher than NS + NS_TOL is received. */
@@ -144,9 +144,9 @@ void handle_event(uint32_t x)
 	handle_frac((uint32_t) ((uint64_t) x * NS / PLL_HZ));
 }
 
-static inline uint32_t unpack(uint8_t* out)
+static inline uint32_t unpack(uint8_t* data)
 {
-	return (out[0] & 0x7f) | (out[1] << 7) | (out[2] << 14) | (out[3] << 21);
+	return ((data[0] & 0x7f) << 21) | (data[1] << 14) | (data[2] << 7) | data[3];
 }
 
 void print_usage(char* name)

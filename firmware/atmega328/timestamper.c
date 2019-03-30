@@ -119,10 +119,10 @@ static volatile int8_t head = 0;
 
 static inline void packet_out(uint32_t x)
 {
-	uart_putchar(x & 0x7f | 0x80);
-	uart_putchar((x >> 7) & 0x7f);
-	uart_putchar((x >> 14) & 0x7f);
-	uart_putchar((x >> 21) & 0x7f);
+	uart_putchar(((x >> 21) & 0x7f) | 0x80);
+	uart_putchar( (x >> 14) & 0x7f);
+	uart_putchar( (x >>  7) & 0x7f);
+	uart_putchar(  x        & 0x7f);
 }
 
 ISR(INT0_vect)
