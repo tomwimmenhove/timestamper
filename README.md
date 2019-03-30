@@ -2,6 +2,8 @@
 
 This project lets you get get exact timestamps of 'events' (electric pulses on an input).
 
+![TimeStamper image](https://raw.githubusercontent.com/tomwimmenhove/timestamper/master/hardware/enclosure/images/finished1_scaled.jpg)
+
 ## Hardware
 The hardware (schematic and PCB) are designed in KiCad 5, and can be found in the ./hardware/cpld/ directory. The 'heart'
 of the design is a Xilinx XC9572XL CPLD. This CPLD implements a capture-counter which timestamps the arrival of events
