@@ -181,20 +181,14 @@ void print_version()
 	printf("Timestamper version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
 }
 
-uint32_t read_command(int fd)
+uint16_t wait_reply(int fd, uint32_t ev)
 {
-	uint8_t buf[4096];
 	uint8_t packet[4];
 	int pos = 0;
-	int n;
-
+	uint8_t buf[4096];
+	ssize_t n;
 	while ((n = read(fd, buf, sizeof(buf))) > 0)
 	{
-//		printf("buf: ");
-//		for (int i = 0; i < n; i++)
-//			printf("%02X ", buf[i]);
-//		printf("\n");
-
 		for (int i = 0; i < n; i++)
 		{
 			uint8_t b = buf[i];
@@ -213,27 +207,16 @@ uint32_t read_command(int fd)
 
 			if (pos == 4)
 			{
-				return unpack(packet);
-			}
-			if (pos > 4)
-			{
-				fprintf(stderr, "Packet too large!\n");// Data ignored.\n");
-				exit(1);
+				uint32_t reply =  unpack(packet);
+
+				if ((reply & 0xff0000) == (ev & 0xff0000))
+					return reply & 0xffff;
 			}
 		}
 	}
 
-	exit(0);
-}
-
-uint16_t wait_reply(int fd, uint32_t ev)
-{
-	for(;;)
-	{
-		uint32_t reply = read_command(fd);
-		if ((reply & 0xff0000) == (ev & 0xff0000))
-			return reply & 0xffff;
-	}
+	printf("DEAD\n");
+	exit(n != -1 ? 0 : 1);
 }
 
 uint16_t send_command(int fd, uint32_t cmd)
@@ -250,6 +233,42 @@ int calm_m(int p, int q, int r, int n)
 	return (n_ - r) / q;
 }
 
+void read_pll_config(int fd)
+{
+	int pdiv = send_command(fd, 0x8030003);
+	int r18h = send_command(fd, 0x8030018);
+	int r19h = send_command(fd, 0x8030019);
+	int r1ah = send_command(fd, 0x803001a);
+	int r1bh = send_command(fd, 0x803001b);
+
+	int n = (r18h << 4) | ((r19h >> 4) & 0xf);
+	int r = ((r19h & 0xf) << 5) | ((r1ah >> 3) & 0x1f);
+	int q = ((r1ah & 0x7) << 3) | ((r1bh >> 5) & 0x7);
+	int p = (r1bh >> 2) & 0x7;
+	int m = calm_m(p, q, r, n);
+	int pll = (uint64_t) ref_clk * n / m;
+	clock_freq = (int) ((uint64_t) pll / pdiv);
+
+	if ( ( ((uint64_t) ref_clk * n) % (m * pdiv) ) != 0)
+	{
+		fprintf(stderr, "WARNING: resulting PLL frequency is not an interger value. The value will be truncated!\n");
+	}
+
+	if (verbose)
+	{
+		printf("PLL Configuration: \n");
+		printf("  Ref   : %dHz\n", ref_clk);
+		printf("  N     : %d\n", n);
+		printf("  R     : %d\n", r);
+		printf("  Q     : %d\n", q);
+		printf("  P     : %d\n", p);
+		printf("  M     : %d\n", m);
+		printf("  PLL1  : %dHz\n", pll);
+		printf("  PDIV  : %d\n", pdiv);
+		printf("  Clock : %dHz\n", clock_freq);
+	}
+
+}
 
 int main(int argc, char** argv)
 {
@@ -324,13 +343,8 @@ int main(int argc, char** argv)
 	int serfd = open(serial, O_RDWR);
 	if (serfd == -1)
 	{
-
-		int serfd = open(serial, O_RDWR);
-		if (serfd == 0-1)
-		{
-			perror(serial);
-			return 1;
-		}
+		perror(serial);
+		return 1;
 	}
 
 	//if (set_interface_attribs(serfd, B38400) == -1)
@@ -343,46 +357,45 @@ int main(int argc, char** argv)
 	wait_reply(serfd, 0x8000000);
 
 	/* Read PLL configuration */
-	int pdiv = send_command(serfd, 0x8030003);
-	int r18h = send_command(serfd, 0x8030018);
-	int r19h = send_command(serfd, 0x8030019);
-	int r1ah = send_command(serfd, 0x803001a);
-	int r1bh = send_command(serfd, 0x803001b);
+	read_pll_config(serfd);
 
-	int n = (r18h << 4) | ((r19h >> 4) & 0xf);
-	int r = ((r19h & 0xf) << 5) | ((r1ah >> 3) & 0x1f);
-	int q = ((r1ah & 0x7) << 3) | ((r1bh >> 5) & 0x7);
-	int p = (r1bh >> 2) & 0x7;
-	int m = calm_m(p, q, r, n);
-	int pll = (uint64_t) ref_clk * n / m;
-	clock_freq = (int) ((uint64_t) pll / pdiv);
+	/* Start */
+	send_command(serfd, 0x8010000);
 
-	if ( ( ((uint64_t) ref_clk * n) % (m * pdiv) ) != 0)
+	uint8_t packet[4];
+	int pos = 0;
+	uint8_t buf[4096];
+	ssize_t n;
+	while ((n = read(serfd, buf, sizeof(buf))) > 0)
 	{
-		fprintf(stderr, "WARNING: resulting PLL frequency is not an interger value. The value will be truncated!\n");
+		for (int i = 0; i < n; i++)
+		{
+			uint8_t b = buf[i];
+
+			/* Start of 'packet' */
+			if (b & 0x80)
+			{
+				pos = 0;
+			}
+			if (pos < 4)
+			{
+				packet[pos] = b;
+			}
+
+			pos++;
+
+			if (pos == 4)
+			{
+				uint32_t x = unpack(packet);
+				handle_event(x);
+			}
+			if (pos > 4)
+			{
+				fprintf(stderr, "Packet too large!\n");// Data ignored.\n");
+				exit(1);
+			}
+		}
 	}
 
-	if (verbose)
-	{
-		printf("PLL Configuration: \n");
-		printf("  Ref   : %dHz\n", ref_clk);
-		printf("  N     : %d\n", n);
-		printf("  R     : %d\n", r);
-		printf("  Q     : %d\n", q);
-		printf("  P     : %d\n", p);
-		printf("  M     : %d\n", m);
-		printf("  PLL1  : %dHz\n", pll);
-		printf("  PDIV  : %d\n", pdiv);
-		printf("  Clock : %dHz\n", clock_freq);
-	}
-
-	send_command(serfd, 0x8010000); // Start!
-
-	for (;;)
-	{
-		uint32_t x = read_command(serfd);
-		handle_event(x);
-	}
-
-	return 0;
+	return n != -1 ? 0 : 1;
 }
