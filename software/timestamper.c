@@ -33,7 +33,6 @@
 #define VERSION_MINOR	1
 #define VERSION_MICRO	1
 
-#define PLL_HZ 100000000
 #define NS_TOL 100 /* Warn when a capture with a value higher than NS + NS_TOL is received. */
 
 #define NS 1000000000
@@ -43,6 +42,9 @@ int verbose = 0;
 int hide_unreliable = 0;
 int prec = 9;
 char* time_format = "%a, %d %b %Y %T.%N %z";
+int ref_clk = 10000000;
+
+int clock_freq;
 
 uint64_t GetUtcMicros()
 {
@@ -141,12 +143,24 @@ void handle_frac(uint32_t frac)
 void handle_event(uint32_t x)
 {
 	/* Fixed point from counter value to nanoseconds */
-	handle_frac((uint32_t) ((uint64_t) x * NS / PLL_HZ));
+	handle_frac((uint32_t) ((uint64_t) x * NS / clock_freq));
 }
 
 static inline uint32_t unpack(uint8_t* data)
 {
 	return ((data[0] & 0x7f) << 21) | (data[1] << 14) | (data[2] << 7) | data[3];
+}
+
+ssize_t packet_out(int fd, uint32_t x)
+{
+	uint8_t data[4];
+
+	data[0] = ((x >> 21) & 0x7f) | 0x80;
+	data[1] =  (x >> 14) & 0x7f;
+	data[2] =  (x >>  7) & 0x7f;
+	data[3] =   x        & 0x7f;
+
+	return write(fd, data, sizeof(data));
 }
 
 void print_usage(char* name)
@@ -156,7 +170,8 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--format,  -f : Specify the time format (default: \"%s\")\n", time_format);
 	fprintf(stderr, "\t--help,    -h : This\n");
 	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
-	fprintf(stderr, "\t--prec,    -p : Set the number of digits after the decimal point (0..9)\n");
+	fprintf(stderr, "\t--prec,    -p : Set the number of digits after the decimal point (0..9) [%d]\n", prec);
+	fprintf(stderr, "\t--refclk   -c : Set the reference clock (integer, in Hz) [%d]\n", ref_clk);
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--version, -V : Show version information\n");
 }
@@ -165,6 +180,76 @@ void print_version()
 {
 	printf("Timestamper version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
 }
+
+uint32_t read_command(int fd)
+{
+	uint8_t buf[4096];
+	uint8_t packet[4];
+	int pos = 0;
+	int n;
+
+	while ((n = read(fd, buf, sizeof(buf))) > 0)
+	{
+//		printf("buf: ");
+//		for (int i = 0; i < n; i++)
+//			printf("%02X ", buf[i]);
+//		printf("\n");
+
+		for (int i = 0; i < n; i++)
+		{
+			uint8_t b = buf[i];
+
+			/* Start of 'packet' */
+			if (b & 0x80)
+			{
+				pos = 0;
+			}
+			if (pos < 4)
+			{
+				packet[pos] = b;
+			}
+
+			pos++;
+
+			if (pos == 4)
+			{
+				return unpack(packet);
+			}
+			if (pos > 4)
+			{
+				fprintf(stderr, "Packet too large!\n");// Data ignored.\n");
+				exit(1);
+			}
+		}
+	}
+
+	exit(0);
+}
+
+uint16_t wait_reply(int fd, uint32_t ev)
+{
+	for(;;)
+	{
+		uint32_t reply = read_command(fd);
+		if ((reply & 0xff0000) == (ev & 0xff0000))
+			return reply & 0xffff;
+	}
+}
+
+uint16_t send_command(int fd, uint32_t cmd)
+{
+	packet_out(fd, cmd);
+	return wait_reply(fd, cmd);
+}
+
+int calm_m(int p, int q, int r, int n)
+{   
+	int n_;
+
+	n_ = n << p;
+	return (n_ - r) / q;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -177,6 +262,7 @@ int main(int argc, char** argv)
 			{"help",    no_argument,       0, 'h'},
 			{"hide",    no_argument,       0, 'r'},
 			{"prec",    required_argument, 0, 'p'},
+			{"refclk",  required_argument, 0, 'c'},
 			{"verbose", no_argument,       0, 'v'},
 			{"version", no_argument,       0, 'V' },
 			{0, 0, 0, 0}
@@ -184,7 +270,7 @@ int main(int argc, char** argv)
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vf:hrp:",
+		c = getopt_long (argc, argv, "vf:hrp:c:",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -201,6 +287,9 @@ int main(int argc, char** argv)
 				return 0;
 			case 'r':
 				hide_unreliable = 1;
+				break;
+			case 'c':
+				ref_clk = atoi(optarg);
 				break;
 			case 'p':
 				prec = atoi(optarg);
@@ -250,41 +339,50 @@ int main(int argc, char** argv)
 
 	tcflush(serfd,TCIOFLUSH);
 
-	uint8_t buf[4096];
-	uint8_t packet[4];
-	int pos = 0;
-	int n;
-	while ((n = read(serfd, buf, sizeof(buf))) > 0)
+	/* Wait until the device is ready... */
+	wait_reply(serfd, 0x8000000);
+
+	/* Read PLL configuration */
+	int pdiv = send_command(serfd, 0x8030003);
+	int r18h = send_command(serfd, 0x8030018);
+	int r19h = send_command(serfd, 0x8030019);
+	int r1ah = send_command(serfd, 0x803001a);
+	int r1bh = send_command(serfd, 0x803001b);
+
+	int n = (r18h << 4) | ((r19h >> 4) & 0xf);
+	int r = ((r19h & 0xf) << 5) | ((r1ah >> 3) & 0x1f);
+	int q = ((r1ah & 0x7) << 3) | ((r1bh >> 5) & 0x7);
+	int p = (r1bh >> 2) & 0x7;
+	int m = calm_m(p, q, r, n);
+	int pll = (uint64_t) ref_clk * n / m;
+	clock_freq = (int) ((uint64_t) pll / pdiv);
+
+	if ( ( ((uint64_t) ref_clk * n) % (m * pdiv) ) != 0)
 	{
-		for (int i = 0; i < n; i++)
-		{
-			uint8_t b = buf[i];
-
-			/* Start of 'packet' */
-			if (b & 0x80)
-			{
-				pos = 0;
-			}
-			if (pos < 4)
-			{
-				packet[pos] = b;
-			}
-
-			pos++;
-
-			if (pos == 4)
-			{
-				uint32_t x = unpack(packet);
-
-				handle_event(x);
-			}
-			if (pos > 4)
-			{
-				fprintf(stderr, "Packet too large! Data ignored.\n");
-				return 1;
-			}
-		}
+		fprintf(stderr, "WARNING: resulting PLL frequency is not an interger value. The value will be truncated!\n");
 	}
 
-	return n == 0 ? 0 : 1;
+	if (verbose)
+	{
+		printf("PLL Configuration: \n");
+		printf("  Ref   : %dHz\n", ref_clk);
+		printf("  N     : %d\n", n);
+		printf("  R     : %d\n", r);
+		printf("  Q     : %d\n", q);
+		printf("  P     : %d\n", p);
+		printf("  M     : %d\n", m);
+		printf("  PLL1  : %dHz\n", pll);
+		printf("  PDIV  : %d\n", pdiv);
+		printf("  Clock : %dHz\n", clock_freq);
+	}
+
+	send_command(serfd, 0x8010000); // Start!
+
+	for (;;)
+	{
+		uint32_t x = read_command(serfd);
+		handle_event(x);
+	}
+
+	return 0;
 }

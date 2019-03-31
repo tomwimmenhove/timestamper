@@ -21,6 +21,10 @@
 #define CDCE925_ADDR  0x64
 
 void cdce925_init();
-void cdce925_burn() ;
+void cdce925_burn();
+
+void write_cdce925_reg(uint8_t reg, uint8_t data);
+uint8_t read_cdce925_reg(uint8_t reg);
+
 
 #endif //CDCE925_H

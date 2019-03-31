@@ -24,6 +24,17 @@ static inline void uart_putchar(char c)
 	UDR0 = c;
 }
 
+static inline char uart_getchar(void)
+{
+	loop_until_bit_is_set(UCSR0A, RXC0); /* Wait until data available. */
+	return UDR0;
+}
+
+static inline char uart_haschar()
+{
+	return (UCSR0A & _BV(RXC0)) != 0;
+}
+
 static inline void uart_puts(const char* s)
 {
 	char c;

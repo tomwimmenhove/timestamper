@@ -22,12 +22,12 @@
 
 #include "cdce925_regs.h"
 
-static void write_reg(uint8_t reg, uint8_t data)
+void write_cdce925_reg(uint8_t reg, uint8_t data)
 {
     i2c_writeReg(CDCE925_ADDR * 2, reg, &data, 1);
 }
 
-static uint8_t read_reg(uint8_t reg)
+uint8_t read_cdce925_reg(uint8_t reg)
 {
     uint8_t data;
 
@@ -40,17 +40,17 @@ void cdce925_init()
 {   
     for (int i = 0; i < sizeof(cdce925_regs); i++)
     {   
-        write_reg(0x80 | i, cdce925_regs[i]);
+        write_cdce925_reg(0x80 | i, cdce925_regs[i]);
     }
 }
 
 void cdce925_burn()
 {
-    write_reg(0x86, 0); // Reset write bit
-    write_reg(0x86, 1); // Set write bit
+    write_cdce925_reg(0x86, 0); // Reset write bit
+    write_cdce925_reg(0x86, 1); // Set write bit
 
     // wait until done
-    while (read_reg(0x81) & 0x40 == 0x40)
+    while (read_cdce925_reg(0x81) & 0x40 == 0x40)
     {
         // Wait...
     }

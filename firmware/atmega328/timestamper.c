@@ -106,7 +106,7 @@ void setup_hw()
 	/* Setup interrupts */
 	MCUCR = 0;  // Trigger INT0 on low level
 	EIMSK = 1;
-	sei();		// Enable
+//	sei();		// Enable
 
 //	printf("OK\r\n");
 }
@@ -157,9 +157,54 @@ ISR(INT0_vect)
 #endif
 }
 
+static inline uint32_t unpack(uint8_t* data)
+{
+	return (((uint32_t) data[0] & 0x7f) << 21) | ((uint32_t) data[1] << 14) | ((uint32_t) data[2] << 7) | (uint32_t) data[3];
+}
+
+void handle_event(uint32_t cmd)
+{
+	switch((cmd >> 16) & 0xff)
+	{
+		case 0x01:
+			{
+			sei();
+			packet_out(cmd); // ACK
+			break;
+			}
+		case 0x02:
+			{
+			cli();
+			packet_out(cmd); // ACK
+			break;
+			}
+
+		case 0x03: // read cdce925 reg
+			{
+			uint8_t r = read_cdce925_reg((cmd & 0xff) | 0x80);
+			cmd &= ~0xff;
+			cmd |= r;
+
+			packet_out(cmd); // ACK, result
+			return;
+			}
+		case 0x04: // write cdce925 reg
+			{
+			write_cdce925_reg((cmd & 0xff) | 0x80, cmd >> 8);
+			packet_out(cmd); // ACK
+			break;
+			}
+	}
+}
+
 void main()
 {
+	uint8_t packet[4];
+	int pos = 0;
+
 	setup_hw();
+
+	packet_out(0x08000000); // I'm ready...
 
 	while (1)
 	{
@@ -175,6 +220,30 @@ void main()
 			EIMSK = 1; // re-enable interrupts (in case they were disabled, in the event of a full buffer)
 		}
 #endif
+
+		if (uart_haschar())
+		{
+			uint8_t b = uart_getchar();
+
+			/* Start of 'packet' */
+			if (b & 0x80)
+			{   
+				pos = 0;
+			}
+			if (pos < 4)
+			{   
+				packet[pos] = b;
+			}
+
+			pos++;
+
+			if (pos == 4)
+			{
+				uint32_t x = unpack(packet);
+
+				handle_event(x);
+			}
+		}
 	}
 }
 
