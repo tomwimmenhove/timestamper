@@ -91,14 +91,15 @@ void print_time(int64_t top, uint32_t frac, const char* format)
 char* fp_str(int64_t x)
 {
 	static char s[32];
+	int min = 0;
 
 	if (x < 0)
 	{
 		x = -x;
-		printf("-");
+		min = 1;
 	}
 
-	snprintf(s, sizeof(s), "%ld.%09ld", x / NS, x % NS);
+	snprintf(s, sizeof(s), "%s%ld.%09ld", min ? "-" : "" , x / NS, x % NS);
 
 	return s;
 }
