@@ -99,10 +99,6 @@ void setup_hw()
 	RESET_CAPT_PORT |= RESET_CAPT_MASK;
 	RESET_CAPT_PORT &= ~RESET_CAPT_MASK;
 
-	/* Do this once to store the PLL values in the CDCE925 EEPROM */
-//	cdce925_init();
-//	cdce925_burn();
-
 	/* Setup interrupts */
 	MCUCR = 0;  // Trigger INT0 on low level
 	EIMSK = 1;
@@ -169,6 +165,7 @@ void handle_event(uint32_t cmd)
 		case 0x01:
 			{
 			sei();
+			tail = head = 0;
 			packet_out(cmd); // ACK
 			break;
 			}
@@ -176,6 +173,7 @@ void handle_event(uint32_t cmd)
 			{
 			cli();
 			packet_out(cmd); // ACK
+			tail = head = 0;
 			break;
 			}
 
@@ -194,6 +192,16 @@ void handle_event(uint32_t cmd)
 			packet_out(cmd); // ACK
 			break;
 			}
+
+		case 0x05: // Write initial values to cdce925
+			cdce925_init();
+			packet_out(cmd); // ACK
+			break;
+
+		case 0x06: // Write PLL config to PLL's EEPROM
+			cdce925_burn();
+			packet_out(cmd); // ACK
+			break;
 	}
 }
 

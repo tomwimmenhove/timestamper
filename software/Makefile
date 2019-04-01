@@ -2,7 +2,7 @@ src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
 CFLAGS = -O2 -Wall
-LDFLAGS = 
+LDFLAGS = -lm
 
 ifeq ($(PREFIX),)
 	PREFIX := /usr/local

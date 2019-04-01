@@ -26,12 +26,15 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <termios.h>
+#include <math.h>
 
 #include "serial.h"
+#include "cdce925.h"
+#include "command.h"
 
 #define VERSION_MAJOR	0
 #define VERSION_MINOR	1
-#define VERSION_MICRO	1
+#define VERSION_MICRO	2
 
 #define NS_TOL 100 /* Warn when a capture with a value higher than NS + NS_TOL is received. */
 
@@ -42,7 +45,7 @@ int verbose = 0;
 int hide_unreliable = 0;
 int prec = 9;
 char* time_format = "%a, %d %b %Y %T.%N %z";
-int ref_clk = 10000000;
+double ref_clk = 10e6;
 
 int clock_freq;
 
@@ -146,23 +149,6 @@ void handle_event(uint32_t x)
 	handle_frac((uint32_t) ((uint64_t) x * NS / clock_freq));
 }
 
-static inline uint32_t unpack(uint8_t* data)
-{
-	return ((data[0] & 0x7f) << 21) | (data[1] << 14) | (data[2] << 7) | data[3];
-}
-
-ssize_t packet_out(int fd, uint32_t x)
-{
-	uint8_t data[4];
-
-	data[0] = ((x >> 21) & 0x7f) | 0x80;
-	data[1] =  (x >> 14) & 0x7f;
-	data[2] =  (x >>  7) & 0x7f;
-	data[3] =   x        & 0x7f;
-
-	return write(fd, data, sizeof(data));
-}
-
 void print_usage(char* name)
 {
 	fprintf(stderr, "Usage: %s [options] <serial port>\n", name);
@@ -171,7 +157,12 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--help,    -h : This\n");
 	fprintf(stderr, "\t--hide,    -r : Hide unreliable timestamps (instead of denoting them with an asterisk (*))\n");
 	fprintf(stderr, "\t--prec,    -p : Set the number of digits after the decimal point (0..9) [%d]\n", prec);
-	fprintf(stderr, "\t--refclk   -c : Set the reference clock (integer, in Hz) [%d]\n", ref_clk);
+	fprintf(stderr, "\t--refclk   -c : Set the reference clock in Hz [%f]\n", ref_clk);
+	fprintf(stderr, "\t--sysclk   -s : Set the PLL output clock in the format of \"PLL:DIV\" in Hz (I.E. 200e6:2 would be 100MHz)\n");
+	fprintf(stderr, "\t--auxclk   -a : Same as --sysclk, but for the auxiliary output\n");
+	fprintf(stderr, "\t--pllinit, -i : Write 'factory defaults' to PLL\n");
+	fprintf(stderr, "\t--write,   -W : Write the PLL configuration to non-volatile memory\n");
+	fprintf(stderr, "\t--exit,    -e : Don't output timesamps; exit after initialization and configuration.\n");
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--version, -V : Show version information\n");
 }
@@ -181,97 +172,80 @@ void print_version()
 	printf("Timestamper version %d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
 }
 
-uint16_t wait_reply(int fd, uint32_t ev)
+double read_pll_config(int fd, int pll_id)
 {
-	uint8_t packet[4];
-	int pos = 0;
-	uint8_t buf[4096];
-	ssize_t n;
-	while ((n = read(fd, buf, sizeof(buf))) > 0)
-	{
-		for (int i = 0; i < n; i++)
+	int pdiv = pll_id == 0 ? cdce925_get_clockdiv(fd) : cdce925_get_auxdiv(fd);
+
+    struct cdce_nrqp nrqp;
+    cdce925_get_nrqp(&nrqp, fd, pll_id);
+
+    int m = cdce925_calc_m(nrqp.p, nrqp.q, nrqp.r, nrqp.n);
+    double pll = (double) ref_clk * nrqp.n / m;
+    double f = ((double) pll / pdiv);
+
+    if (verbose)
+    {
+        printf("%s PLL Configuration: \n", pll_id == 0 ? "System clock" : "Auxiliary clock");
+        printf("  Ref   : %fHz\n", ref_clk);
+        printf("  N     : %d\n", nrqp.n);
+		if (verbose > 1)
 		{
-			uint8_t b = buf[i];
-
-			/* Start of 'packet' */
-			if (b & 0x80)
-			{
-				pos = 0;
-			}
-			if (pos < 4)
-			{
-				packet[pos] = b;
-			}
-
-			pos++;
-
-			if (pos == 4)
-			{
-				uint32_t reply =  unpack(packet);
-
-				if ((reply & 0xff0000) == (ev & 0xff0000))
-					return reply & 0xffff;
-			}
+			printf("  R     : %d\n", nrqp.r);
+			printf("  Q     : %d\n", nrqp.q);
+			printf("  P     : %d\n", nrqp.p);
 		}
-	}
+        printf("  M     : %d\n", m);
+        printf("  Osc   : %fHz\n", pll);
+        printf("  Div   : %d\n", pdiv);
+        printf("  Clock : %fHz\n", f);
+    }
 
-	printf("DEAD\n");
-	exit(n != -1 ? 0 : 1);
+	return f;
 }
 
-uint16_t send_command(int fd, uint32_t cmd)
+void parse_divclock(char* s, double* f, int* div)
 {
-	packet_out(fd, cmd);
-	return wait_reply(fd, cmd);
+	char* del = strstr(s, ":");
+	if (del == NULL)
+	{
+		fprintf(stderr, "Clock not given in the correct format!\n");
+		exit(1);
+	}
+	
+	*del = 0;
+
+	*f = atof(s);
+	*div = atoi(del + 1);
+
+	if (*f < 80e6 || *f > 230e6)
+	{
+		fprintf(stderr, "PLL frequency must be between 80 and 230MHz\n");
+		exit(1);
+	}
 }
 
-int calm_m(int p, int q, int r, int n)
-{   
-	int n_;
-
-	n_ = n << p;
-	return (n_ - r) / q;
-}
-
-void read_pll_config(int fd)
+void print_exclusive_pll_set_error()
 {
-	int pdiv = send_command(fd, 0x8030003);
-	int r18h = send_command(fd, 0x8030018);
-	int r19h = send_command(fd, 0x8030019);
-	int r1ah = send_command(fd, 0x803001a);
-	int r1bh = send_command(fd, 0x803001b);
-
-	int n = (r18h << 4) | ((r19h >> 4) & 0xf);
-	int r = ((r19h & 0xf) << 5) | ((r1ah >> 3) & 0x1f);
-	int q = ((r1ah & 0x7) << 3) | ((r1bh >> 5) & 0x7);
-	int p = (r1bh >> 2) & 0x7;
-	int m = calm_m(p, q, r, n);
-	int pll = (uint64_t) ref_clk * n / m;
-	clock_freq = (int) ((uint64_t) pll / pdiv);
-
-	if ( ( ((uint64_t) ref_clk * n) % (m * pdiv) ) != 0)
-	{
-		fprintf(stderr, "WARNING: resulting PLL frequency is not an interger value. The value will be truncated!\n");
-	}
-
-	if (verbose)
-	{
-		printf("PLL Configuration: \n");
-		printf("  Ref   : %dHz\n", ref_clk);
-		printf("  N     : %d\n", n);
-		printf("  R     : %d\n", r);
-		printf("  Q     : %d\n", q);
-		printf("  P     : %d\n", p);
-		printf("  M     : %d\n", m);
-		printf("  PLL1  : %dHz\n", pll);
-		printf("  PDIV  : %d\n", pdiv);
-		printf("  Clock : %dHz\n", clock_freq);
-	}
-
+	fprintf(stderr, "Can't use --sysclk or --auxclk together with --pllinit\n");
+	exit(1);
 }
 
 int main(int argc, char** argv)
 {
+	int set_sys = 0;
+	int set_aux = 0;
+
+	int pll_init = 0;
+	int pll_write = 0;
+
+	double sys_clk;
+	int sys_div;
+	double aux_clk;
+	int aux_div;
+
+	int pll_wait = 0;
+	int exit_after = 0;
+
 	int c;
 	while (1)
 	{
@@ -280,8 +254,13 @@ int main(int argc, char** argv)
 			{"format",  required_argument, 0, 'f'},
 			{"help",    no_argument,       0, 'h'},
 			{"hide",    no_argument,       0, 'r'},
+			{"exit",    no_argument,       0, 'e'},
 			{"prec",    required_argument, 0, 'p'},
 			{"refclk",  required_argument, 0, 'c'},
+			{"sysclk",  required_argument, 0, 's'},
+			{"auxclk",  required_argument, 0, 'a'},
+			{"pllinit", no_argument,       0, 'i'},
+			{"write",   no_argument,       0, 'W'},
 			{"verbose", no_argument,       0, 'v'},
 			{"version", no_argument,       0, 'V' },
 			{0, 0, 0, 0}
@@ -289,7 +268,7 @@ int main(int argc, char** argv)
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vf:hrp:c:",
+		c = getopt_long (argc, argv, "vf:hrp:c:s:a:iWe",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -308,7 +287,7 @@ int main(int argc, char** argv)
 				hide_unreliable = 1;
 				break;
 			case 'c':
-				ref_clk = atoi(optarg);
+				ref_clk = atof(optarg);
 				break;
 			case 'p':
 				prec = atoi(optarg);
@@ -317,8 +296,48 @@ int main(int argc, char** argv)
 					print_usage(argv[0]);
 					return 1;
 				}
-
 				break;
+
+			case 's':
+				if (pll_init)
+					print_exclusive_pll_set_error();
+
+				parse_divclock(optarg, &sys_clk, &sys_div);
+				set_sys = 1;
+				if (sys_div < 1 || sys_div > 255)
+				{
+					fprintf(stderr, "System clock divider must be between 1 and 255\n");
+					return 1;
+				}
+				break;
+
+			case 'a':
+				if (pll_init)
+					print_exclusive_pll_set_error();
+
+				parse_divclock(optarg, &aux_clk, &aux_div);
+				set_aux = 1;
+				if (aux_div < 1 || aux_div > 127)
+				{
+					fprintf(stderr, "Auxiliary lock divider must be between 1 and 127\n");
+					return 1;
+				}
+				break;
+
+			case 'i':
+				if (set_aux || set_sys)
+					print_exclusive_pll_set_error();
+				pll_init = 1;
+				break;
+
+			case 'W':
+				pll_write = 1;
+				break;
+
+			case 'e':
+				exit_after = 1;
+				break;
+
 			case 'v':
 				verbose++;
 				break;
@@ -347,7 +366,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	//if (set_interface_attribs(serfd, B38400) == -1)
 	if (set_interface_attribs(serfd, 76800) == -1)
 		return 1;
 
@@ -356,8 +374,53 @@ int main(int argc, char** argv)
 	/* Wait until the device is ready... */
 	wait_reply(serfd, 0x8000000);
 
-	/* Read PLL configuration */
-	read_pll_config(serfd);
+	if (pll_init)
+		send_command(serfd, 0x8050000);
+	
+	if (set_sys)
+	{
+		struct cdce_nrqp nrqp;
+		double f = cdce925_find_best(&nrqp, ref_clk, sys_clk);
+		if (f != sys_clk)
+			fprintf(stderr, "WARNING: An exact PLL configuration for the requested system clock frequency could not be found. Using closest match: %fHz\n", f);
+
+		cdce925_set_nrqp(&nrqp, serfd, 0, cdce925_getrange(f));
+		cdce925_set_clockdiv(serfd, sys_div);
+
+		pll_wait = 1;
+	}
+
+	/* Read system clock PLL configuration */
+	double f = read_pll_config(serfd, 0);
+	clock_freq = (int) round(f);
+	if (f != clock_freq)
+		fprintf(stderr, "WARNING: resulting PLL frequency is not an interger value. The value will be rounded!\n");
+
+	if (set_aux)
+	{
+		struct cdce_nrqp nrqp;
+		double f = cdce925_find_best(&nrqp, ref_clk, aux_clk);
+		if (f != aux_clk)
+			fprintf(stderr, "WARNING: An exact PLL configuration for the requested auxiliary clock frequency could not be found. Using closest match: %fHz\n", f);
+
+		cdce925_set_nrqp(&nrqp, serfd, 1, cdce925_getrange(f));
+		cdce925_set_auxdiv(serfd, aux_div);
+
+		pll_wait = 1;
+	}
+	
+	/* Read Auxiliary clock configuration */
+	read_pll_config(serfd, 1);
+
+	if (pll_write)
+		send_command(serfd, 0x8060000);
+
+	if (exit_after)
+		return 0;
+
+	/* Give PLL time to settle */
+	if (pll_wait)
+		usleep(1000000);
 
 	/* Start */
 	send_command(serfd, 0x8010000);
