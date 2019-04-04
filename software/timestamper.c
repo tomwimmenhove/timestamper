@@ -41,9 +41,13 @@
 #define NS 1000000000
 
 // Command line options
+#define DBG_DUMB_OPT 1000
+#define DBG_DELTA_OPT 1001
 int verbose = 0;
 int hide_unreliable = 0;
 int prec = 9;
+int dumb = 0;
+int delta = 0;
 char* time_format = "%a, %d %b %Y %T.%N %z";
 double ref_clk = 10e6;
 
@@ -163,7 +167,10 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--auxclk   -a : Same as --sysclk, but for the auxiliary output\n");
 	fprintf(stderr, "\t--pllinit, -i : Write 'factory defaults' to PLL\n");
 	fprintf(stderr, "\t--write,   -W : Write the PLL configuration to non-volatile memory\n");
-	fprintf(stderr, "\t--exit,    -e : Don't output timesamps; exit after initialization and configuration.\n");
+	fprintf(stderr, "\t--exit,    -e : Don't output timesamps; exit after initialization and configuration\n");
+	fprintf(stderr, "\t--dbgdumb     : Debug: Only print the counter value\n");
+	fprintf(stderr, "\t--dbgdelta    : Debug: Only print the differences between counter values\n");
+
 	fprintf(stderr, "\t--verbose, -v : Increase verbosity\n");
 	fprintf(stderr, "\t--version, -V : Show version information\n");
 }
@@ -256,6 +263,8 @@ int main(int argc, char** argv)
 			{"help",    no_argument,       0, 'h'},
 			{"hide",    no_argument,       0, 'r'},
 			{"exit",    no_argument,       0, 'e'},
+			{"dbgdumb", no_argument,       0, DBG_DUMB_OPT },
+			{"dbgdelta",no_argument,       0, DBG_DELTA_OPT },
 			{"prec",    required_argument, 0, 'p'},
 			{"refclk",  required_argument, 0, 'c'},
 			{"sysclk",  required_argument, 0, 's'},
@@ -333,6 +342,14 @@ int main(int argc, char** argv)
 
 			case 'W':
 				pll_write = 1;
+				break;
+
+			case DBG_DUMB_OPT:
+				dumb = 1;
+				break;
+
+			case DBG_DELTA_OPT:
+				dumb = delta = 1;
 				break;
 
 			case 'e':
@@ -430,6 +447,7 @@ int main(int argc, char** argv)
 	int pos = 0;
 	uint8_t buf[4096];
 	ssize_t n;
+	uint32_t last_value = 0;
 	while ((n = read(serfd, buf, sizeof(buf))) > 0)
 	{
 		for (int i = 0; i < n; i++)
@@ -451,7 +469,25 @@ int main(int argc, char** argv)
 			if (pos == 4)
 			{
 				uint32_t x = unpack(packet);
-				handle_event(x);
+
+				if (dumb)
+				{
+					int32_t v = x;
+
+					if (delta)
+					{
+						v -= last_value;
+						if (v < 0)
+							v += 134217728;
+					}
+
+					printf("%d\n", v);
+					last_value = x;
+				}
+				else
+				{
+					handle_event(x);
+				}
 			}
 			if (pos > 4)
 			{
