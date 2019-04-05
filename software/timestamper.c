@@ -145,7 +145,6 @@ void handle_frac(uint32_t frac)
 	if (verbose > 0) printf(" -- Error: %ss", fp_str(err));
 
 	putchar('\n');
-	fflush(stdout);
 }
 
 void handle_event(uint32_t x)
@@ -488,6 +487,8 @@ int main(int argc, char** argv)
 				{
 					handle_event(x);
 				}
+
+				fflush(stdout);
 			}
 			if (pos > 4)
 			{
