@@ -45,13 +45,13 @@ int set_interface_attribs (int fd, int speed)
     tty.c_ospeed = speed;
 
     tty.c_cflag |= (CLOCAL | CREAD);
-    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG | ECHONL | IEXTEN);
     tty.c_cflag &= ~PARENB;
     tty.c_cflag &= ~CSTOPB;
     tty.c_cflag &= ~CSIZE;
     tty.c_cflag |= CS8;
     tty.c_cflag &= ~CRTSCTS;
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY | IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL );
     tty.c_oflag &= ~OPOST;
     tty.c_cc[VMIN]  = 1;
     tty.c_cc[VTIME] = 0;
@@ -82,14 +82,14 @@ int set_interface_attribs (int fd, int speed)
 	cfsetispeed(&tty, speed);
 
 	tty.c_cflag |= (CLOCAL | CREAD);
-	tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+	tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG | ECHONL | IEXTEN);
 	tty.c_cflag &= ~PARENB;
 	tty.c_cflag &= ~CSTOPB;
 	tty.c_cflag &= ~CSIZE;
 	tty.c_cflag |= CS8;
 	//tty.c_cflag &= ~CNEW_RTSCTS;
 	tty.c_cflag &= ~CRTSCTS;
-	tty.c_iflag &= ~(IXON | IXOFF | IXANY);
+	tty.c_iflag &= ~(IXON | IXOFF | IXANY | IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL );
 	tty.c_oflag &= ~OPOST;
 	tty.c_cc[VMIN]  = 1;
 	tty.c_cc[VTIME] = 0;

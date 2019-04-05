@@ -17,7 +17,7 @@ void pack(uint8_t* data, uint32_t x)
 
 int main(int argc, char** argv)
 {
-	for (int i = 0; i < 100000000; i++)
+	for (int i = 0; i < 134217728; i++)
 	{
 		uint8_t d[4];
 
