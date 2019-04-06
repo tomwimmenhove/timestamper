@@ -48,6 +48,7 @@ int hide_unreliable = 0;
 int prec = 9;
 int dumb = 0;
 int delta = 0;
+int offset = 0;
 char* time_format = "%a, %d %b %Y %T.%N %z";
 double ref_clk = 10e6;
 
@@ -61,11 +62,25 @@ uint64_t GetUtcMicros()
 	return (unsigned long long)(tv.tv_sec) * 1000000 + (unsigned long long)(tv.tv_usec);
 }
 
-void print_time(int64_t top, uint32_t frac, const char* format)
+void print_time(int64_t top, int32_t frac, const char* format)
 {
+	char s[256];
+
+	/* Add offset */
+	frac += offset;
+	if (frac >= NS)
+	{
+		frac -= NS;
+		top++;
+	}
+	if (frac < 0)
+	{
+		frac += NS;
+		top--;
+	}
+
 	time_t now_s = top;
 	struct tm *now_tm;
-	char s[256];
 
 	now_tm = localtime(&now_s);
 	if (strftime(s, sizeof(s) - 1, format, now_tm) <= 0)
@@ -166,6 +181,7 @@ void print_usage(char* name)
 	fprintf(stderr, "\t--auxclk   -a : Same as --sysclk, but for the auxiliary output\n");
 	fprintf(stderr, "\t--pllinit, -i : Write 'factory defaults' to PLL\n");
 	fprintf(stderr, "\t--write,   -W : Write the PLL configuration to non-volatile memory\n");
+	fprintf(stderr, "\t--offset,  -o : Set the offset (ns, -1s < offset < 1s) to add to every capture\n");
 	fprintf(stderr, "\t--exit,    -e : Don't output timesamps; exit after initialization and configuration\n");
 	fprintf(stderr, "\t--dbgdumb     : Debug: Only print the counter value\n");
 	fprintf(stderr, "\t--dbgdelta    : Debug: Only print the differences between counter values\n");
@@ -268,6 +284,7 @@ int main(int argc, char** argv)
 			{"refclk",  required_argument, 0, 'c'},
 			{"sysclk",  required_argument, 0, 's'},
 			{"auxclk",  required_argument, 0, 'a'},
+			{"offset",  required_argument, 0, 'o'},
 			{"pllinit", no_argument,       0, 'i'},
 			{"write",   no_argument,       0, 'W'},
 			{"verbose", no_argument,       0, 'v'},
@@ -277,7 +294,7 @@ int main(int argc, char** argv)
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vf:hrp:c:s:a:iWe",
+		c = getopt_long (argc, argv, "vf:hrp:c:s:a:iWeo:",
 				long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -341,6 +358,15 @@ int main(int argc, char** argv)
 
 			case 'W':
 				pll_write = 1;
+				break;
+
+			case 'o':
+				offset = atoi(optarg);
+				if (offset > 999999999 || offset < -999999999)
+				{
+					fprintf(stderr, "Offset must be between -999999999 an 999999999ns\n");
+					return 1;
+				}
 				break;
 
 			case DBG_DUMB_OPT:
